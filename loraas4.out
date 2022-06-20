@@ -1,0 +1,1676 @@
+CSE 423 HW4 test run output for hw4_resubmission2
+------------------------------------------------------------
+	.zip Compiles w/no warnings:           _2/2
+	Exe named j0 Runs on Basic Stuff:      _2/2
+	Valgrind reports no warnings:          _2/2
+	-symtab prints symbol tables:          _6/6
+	Undeclared Error:                      _4/4 why twice?
+	Redeclaration Error:                   _4/4
+	-------------------------------------------
+	Total:                                 20/20
+	Reduced late/resubmit fee -2	       18/20
+
+	-------------------------------------------------------
+
+	(extracting done rv=0)
+	(make)
+
+bison -d j0gram.y
+j0gram.y: warning: 10 shift/reduce conflicts [-Wconflicts-sr]
+gcc -c -Wall j0gram.tab.c
+flex j0lex.l
+gcc -c -Wall lex.yy.c
+gcc -c -Wall parse.c
+gcc -c -Wall symt.c
+gcc -c -Wall main.c
+gcc -g -Wall j0gram.tab.o lex.yy.o parse.o symt.o main.o -o j0
+
+
+	(make done rv=0)
+
+------------------------------------------------------------------------
+
+Executing from: /fserv/home/jeffery/submit/423/hw4/hw4_resubmission2
+	Test#1 Input:
+public class basic {
+public static int x ;
+public static void main(String []argv) {
+   x = 5;
+   x = x * x;
+}
+}
+
+	Test command: timeout 1s ./j0  ../basic.java | head -40
+
+	Test Output [expect no errors]
+ClassDecl (1000): 2
+	basic (270): 0
+	ClassBody (1010): 1
+		ClassBodyDecls (1020): 2
+			FieldDecl (1030): 2
+				int (263): 0
+				x (270): 0
+			MethodDecl (1070): 2
+				MethodHeader (1080): 2
+					void (265): 0
+					MethodDeclarator (1090): 2
+						main (270): 0
+						FormalParm (1111): 2
+							String (270): 0
+							argv (270): 0
+				Block (1140): 1
+					BlockStmts (1150): 2
+						ExprStmt (1180): 1
+							Assignment (1390): 3
+								x (270): 0
+								= (303): 0
+								5 (275): 0
+						ExprStmt (1180): 1
+							Assignment (1390): 3
+								x (270): 0
+								= (303): 0
+								MulExpr (1330): 2
+									x (270): 0
+									x (270): 0
+	(testrun done rv=0)
+==13231== Memcheck, a memory error detector
+==13231== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==13231== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==13231== Command: ./j0 ../basic.java
+==13231== 
+ClassDecl (1000): 2
+	basic (270): 0
+	ClassBody (1010): 1
+		ClassBodyDecls (1020): 2
+			FieldDecl (1030): 2
+				int (263): 0
+				x (270): 0
+			MethodDecl (1070): 2
+				MethodHeader (1080): 2
+					void (265): 0
+					MethodDeclarator (1090): 2
+						main (270): 0
+						FormalParm (1111): 2
+							String (270): 0
+							argv (270): 0
+				Block (1140): 1
+					BlockStmts (1150): 2
+						ExprStmt (1180): 1
+							Assignment (1390): 3
+								x (270): 0
+								= (303): 0
+								5 (275): 0
+						ExprStmt (1180): 1
+							Assignment (1390): 3
+								x (270): 0
+								= (303): 0
+								MulExpr (1330): 2
+									x (270): 0
+									x (270): 0
+==13231== 
+==13231== HEAP SUMMARY:
+==13231==     in use at exit: 32,848 bytes in 34 blocks
+==13231==   total heap usage: 245 allocs, 211 frees, 156,764 bytes allocated
+==13231== 
+==13231== LEAK SUMMARY:
+==13231==    definitely lost: 32,792 bytes in 33 blocks
+==13231==    indirectly lost: 56 bytes in 1 blocks
+==13231==      possibly lost: 0 bytes in 0 blocks
+==13231==    still reachable: 0 bytes in 0 blocks
+==13231==         suppressed: 0 bytes in 0 blocks
+==13231== Rerun with --leak-check=full to see details of leaked memory
+==13231== 
+==13231== For counts of detected and suppressed errors, rerun with: -v
+==13231== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+exit status: 0 expected 0
+
+------------------------------------------------------------------------
+
+Executing from: /fserv/home/jeffery/submit/423/hw4/hw4_resubmission2
+	Test#2 Input:
+public class list {
+public static void main(String []argv) {
+   int [] a;
+   a = new int [8];
+   a[5] = 5;
+   System.out.println(""+a[5]);
+}
+}
+
+	Test command: timeout 1s ./j0 -symtab ../list.java | head -40
+
+	Test Output [expect a couple symbol tables]
+----------Global Symbol Table----------
+System
+list
+String
+---------------------------------------
+----------symbol table for System----------
+in
+out
+---------------------------------------
+----------symbol table for in----------
+read
+---------------------------------------
+----------symbol table for out----------
+println
+print
+---------------------------------------
+----------symbol table for list----------
+main
+---------------------------------------
+----------symbol table for main----------
+argv
+a
+---------------------------------------
+----------symbol table for String----------
+charAt
+toString
+compareTo
+equals
+length
+---------------------------------------
+	(testrun done rv=0)
+
+------------------------------------------------------------------------
+
+Executing from: /fserv/home/jeffery/submit/423/hw4/hw4_resubmission2
+	Test#3 Input:
+public class undeclared {
+public static void main(String []argv) {
+   System.out.println(a);
+}
+}
+
+	Test command: timeout 1s ./j0  ../undeclared.java | head -40
+
+	Test Output [expect an undeclared variable on line 3]
+Variable not declared error for a at line 3 ../undeclared.java:3: Variable not declared error a
+	(testrun done rv=0)
+
+------------------------------------------------------------------------
+
+Executing from: /fserv/home/jeffery/submit/423/hw4/hw4_resubmission2
+	Test#4 Input:
+public class redeclared {
+
+public static int n1 ;
+public static int n2 ;
+
+public static void f(double n1) {
+   double n2;
+   int y;
+
+   double n1;
+   System.out.println(""+ n1);
+   return;
+}
+}
+
+	Test command: timeout 1s ./j0  ../redeclared.java | head -40
+
+	Test Output [expect a redeclaration error on line 10]
+Redeclaration error for n1 at line 6 ../redeclared.java:6: Redeclaration error n1
+	(testrun done rv=0)
+------------------------------------------------------------
+Source Code:
+------------------------------------------------------------
+files: "symt.h tree.h main.c parse.c symt.c " "j0lex.l" "j0gram.y"
+------------------------------------------------------------
+
+/*
+ * If I ever finish this, it will be a stripped down version of symtab
+ * that has removed the string buffery stuff.
+ */
+
+#ifndef SYMT_H
+#define SYMT_H
+#include<stdio.h>
+
+typedef struct sym_table {
+   int nBuckets;			/* # of buckets */
+   int nEntries;			/* # of symbols in the table */
+   struct sym_table *parent;		/* enclosing scope, superclass etc. */
+   struct sym_entry **tbl;
+   /* more per-scope/per-symbol-table attributes go here */
+   } *SymbolTable;
+
+/*
+ * Entry in symbol table.
+ */
+
+typedef struct sym_entry {
+   SymbolTable table;			/* what symbol table do we belong to*/
+   char *s;				/* string */
+   /* more symbol attributes go here for code generation */
+   struct typeinfo *type;
+   struct sym_entry *next;
+   } *SymbolTableEntry;
+
+/*
+ * Prototypes
+ */
+SymbolTable new_st(int size);			/* create symbol table */
+void delete_st(SymbolTable);			/* destroy symbol table */
+
+int insert_sym(SymbolTable, char *);		/* enter symbol into table */
+
+SymbolTableEntry lookup_st(SymbolTable, char *); /* lookup symbol */
+
+extern SymbolTable globals;	       /* global symbols */
+extern SymbolTable current;	       /* current */
+extern struct tree tree;
+
+extern void printsymbols(SymbolTable st, int level);
+#define pushscope(stp) do { stp->parent = current; current = stp; } while (0)
+#define popscope() do { current = current->parent;} while(0)
+void dovariabledeclarator(struct tree *n);
+void semanticerror(char *s, struct tree *n);
+void populate_symboltables(struct tree * n);
+SymbolTable buildglobal(SymbolTable global);
+int redeclaration_error(SymbolTable st, struct tree * n);
+int not_defined_error(SymbolTable st, struct tree * n);
+int qualified_name(SymbolTable st, struct tree * n);
+extern int errors;
+int method_count;
+int block_count;
+SymbolTable globals;
+SymbolTable current;
+char *alloc(int n);		    /* calloc + check for NULL */
+
+#endif					/* SYMTAB_H */
+#ifndef HEADER_FILE
+#define HEADER_FILE
+#include <stdio.h>
+#include "symt.h"
+#include <stdbool.h>
+#define BUFF 1024
+extern int yylineno;
+extern char *yytext;
+extern char *yyfilename;
+
+struct tree {
+   int prodrule;
+   char *symbolname;
+   int id;
+   int nkids;
+   struct tree *kids[9]; /* if nkids >0 */
+   struct token *leaf;   /* if nkids == 0; NULL for ε productions */
+   bool isConst;
+   struct SymbolTable *stab;
+};
+
+struct token {
+   int category;   /* the integer code returned by yylex */
+   char *text;     /* the actual string (lexeme) matched */
+   int lineno;     /* the line number on which the token occurs */
+   char *filename; /* the source file in which the token occurs */
+   int ival;       /* for integer constants, store binary value here */
+   double dval;	   /* for real constants, store binary value here */
+   char *sval;     /* for string constants, malloc space, de-escape, store */
+                   /*    the string (less quotes and after escapes) here */
+   };
+
+struct tree *root;
+
+int alctoken(int category);
+void yyerror(char *s);
+void printnode(struct tree *treeptr);
+struct tree *alctree(int prodrule, char *symbolname, int num, ...);
+void printTree(struct tree *root, int level);
+void freeTree(struct tree *root);
+
+char *escape(char *s);
+char *pretty_print_name(struct tree *t);
+void print_branch(struct tree *t, FILE *f);
+void print_leaf(struct tree *t, FILE *f);
+void print_graph2(struct tree *t, FILE *f);
+void print_graph(struct tree *t, char *filename);
+
+#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "tree.h"
+#include "symt.h"
+extern FILE *yyin;
+extern int yyparse(FILE *f);
+extern int yylex_destroy(void);
+char *yyfilename;
+#define SYMTAB_SIZE 7
+
+int main(int argc, char *argv[]) {
+	yyfilename = (char *)alloc(sizeof(char) * BUFF);
+	if(strcmp(argv[1], "-dot") == 0){
+		strcpy(yyfilename, argv[2]);
+		if(strrchr(yyfilename, '.') == NULL){
+			yyfilename = realloc(yyfilename, strlen(yyfilename) + sizeof(".java"));
+			strcat(yyfilename, ".java\0");
+		}else if (strcmp(strrchr(yyfilename, '.'), ".java") == 0){
+			yyfilename[strlen(yyfilename)] = '\0';
+		}else{
+			printf("ERROR: Wrong File extension included\n");
+			free(yyfilename);
+			return -1;
+		}
+		yyin = fopen(yyfilename, "r");
+    	int out = yyparse(yyin);
+		if(out == 0){
+			print_graph(root, "treegraph.dot");
+		}else{
+    		printf("yyparse returns %d\n", out);
+		}
+
+	//free memory
+		//delete_st()
+		free(yyfilename);
+		fclose(yyin);
+		freeTree(root);
+		yylex_destroy();
+
+	}else if(strcmp(argv[1], "-symtab") == 0){
+		strcpy(yyfilename, argv[2]);
+		if(strrchr(yyfilename, '.') == NULL){
+			yyfilename = realloc(yyfilename, strlen(yyfilename) + sizeof(".java"));
+			strcat(yyfilename, ".java\0");
+		}else if (strcmp(strrchr(yyfilename, '.'), ".java") == 0){
+			yyfilename[strlen(yyfilename)] = '\0';
+		}else{
+			printf("ERROR: Wrong File extension included\n");
+			free(yyfilename);
+			return -1;
+		}
+		yyin = fopen(yyfilename, "r");
+    	int out = yyparse(yyin);
+		if(out == 0){
+			globals = buildglobal(globals);
+			method_count = 0;
+			block_count = 0;
+			populate_symboltables(root);
+			printf("----------Global Symbol Table----------\n");
+			printsymbols(globals, 0);
+			delete_st(globals);
+		}else{
+    		printf("yyparse returns %d\n", out);
+		}
+		//free memory
+			free(yyfilename);
+			fclose(yyin);
+			freeTree(root);
+			yylex_destroy();
+	}else{
+		strcpy(yyfilename, argv[1]);
+		if(strrchr(yyfilename, '.') == NULL){
+			yyfilename = realloc(yyfilename, strlen(yyfilename) + sizeof(".java"));
+			strcat(yyfilename, ".java\0");
+		}else if (strcmp(strrchr(yyfilename, '.'), ".java") == 0){
+			yyfilename[strlen(yyfilename)] = '\0';
+		}else{
+			printf("ERROR: Wrong File extension included\n");
+			free(yyfilename);
+			return -1;
+		}
+		yyin = fopen(yyfilename, "r");
+    	int out = yyparse(yyin);
+		if(out == 0){
+			globals = buildglobal(globals);
+			method_count = 0;
+			block_count = 0;
+			populate_symboltables(root);
+			printTree(root, 0);
+			delete_st(globals);
+		}else{
+    		printf("yyparse returns %d\n", out);
+		}
+
+	//free memory
+		free(yyfilename);
+		fclose(yyin);
+		freeTree(root);
+		yylex_destroy();
+	}
+	return 0;
+}
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+#include "tree.h"
+#include "j0gram.tab.h"
+char *alloc(int n);
+
+int serial;
+
+int alctoken(int category){
+	if(category == 1){
+		printf("Lexical Error: line %d in file %s\n"
+		,yylineno, yyfilename);
+		exit(1);
+	}else{
+		yylval.treeptr = (struct tree *)alloc(sizeof (struct tree));
+		yylval.treeptr->prodrule = category;
+		yylval.treeptr->symbolname = (char *)alloc(sizeof(char) * BUFF);
+		strcpy(yylval.treeptr->symbolname, yytext);
+		yylval.treeptr->nkids = 0;
+		yylval.treeptr->id = serial++;
+		yylval.treeptr->leaf = (struct token *)alloc(sizeof(struct token));
+		yylval.treeptr->leaf->category = category;
+		yylval.treeptr->leaf->text = (char *)alloc(sizeof(char) * BUFF);
+		strcpy(yylval.treeptr->leaf->text, yytext);
+		yylval.treeptr->leaf->lineno = yylineno;
+		yylval.treeptr->leaf->filename = (char *)alloc(sizeof(char) * BUFF);
+		strcpy(yylval.treeptr->leaf->filename, yyfilename);
+		switch (category) {
+			case 275:
+				yylval.treeptr->leaf->ival = atoi(yytext);
+				break;
+			case 276:
+				yylval.treeptr->leaf->dval = strtod(yytext, NULL);
+				break;
+			case 277:
+				yylval.treeptr->leaf->sval = (char *)alloc(sizeof(char) * BUFF);
+				strncpy(yylval.treeptr->leaf->sval, yytext, strlen(yytext)-1);
+				break;
+			default:
+				yylval.treeptr->leaf->sval = NULL;
+				break;
+			}
+	}
+	return category;
+}
+
+struct tree *alctree(int prodrule, char *symbolname, int num, ...){
+	va_list valist;
+	int i;
+	/* initialize valist for num number of arguments */
+	va_start(valist, num);
+	/* access all the arguments assigned to valist */
+	struct tree * treeNode = (struct tree *)alloc(sizeof (struct tree));
+	treeNode->prodrule = prodrule;
+	treeNode->id = serial++;
+	treeNode->symbolname = (char *)alloc(sizeof(char) * BUFF);
+	strcpy(treeNode->symbolname, symbolname);
+	treeNode->nkids = num;
+	treeNode->leaf = NULL;
+	for (i = 0; i < num; i++) {
+		//treeNode->kids[i] = (struct tree *)alloc(sizeof (struct tree));
+		treeNode->kids[i] = va_arg(valist, struct tree*);
+   }
+   /* clean memory reserved for valist */
+   va_end(valist);
+   return treeNode;
+}
+
+void yyerror(char *s){
+   fprintf(stderr, "%s:%d: %s before '%s' token\n",
+	   yyfilename, yylineno, s, yytext);
+	free(yyfilename);
+	exit(2);
+}
+
+/* For My testing purposes
+void printnode(struct tree *treeptr) {
+    struct token *temp = treeptr->leaf;
+        printf("%d\t\t\t", temp->category);
+        printf("%s\t\t\t", temp->text);
+		printf("%d\t\t", temp->lineno);
+        printf("%s\t\t", temp->filename);
+        switch (temp->category) {
+        case 274:
+            printf("    %d\n", temp->ival);
+            break;
+        case 275:
+            printf("    %f\n", temp->dval);
+            break;
+        case 276:
+			for(int i = 1; i < strlen(temp->sval)-1; i++){
+				printf("%c", temp->sval[i]);
+			}
+            printf("\n");
+			break;
+        default:
+            printf("\n");
+			break;
+        }
+}
+*/
+void printTree(struct tree *root, int level){
+	int depth = root->nkids;
+	for(int j = 0; j < level; j++){
+		printf("\t");
+	}
+	if(depth == 0){
+		printf("%s (%d): %d\n",root->leaf->text ,root->leaf->category, root->nkids);
+	}else{
+		level++;
+		printf("%s (%d): %d\n",root->symbolname , root->prodrule, root->nkids);
+		for(int i = 0; i < depth; i++){
+			printTree(root->kids[i], level);
+		}
+	}
+}
+
+void freeTree(struct tree *root){
+	if(root->nkids == 0){
+		//printf("bark\n");
+		free(root->leaf->text);
+		free(root->leaf->filename);
+		if(root->leaf->category == 276)
+			free(root->leaf->sval);
+		free(root->leaf);
+		free(root);
+	}else{
+		free(root->symbolname);
+		int i = 0;
+		while(i < root->nkids){
+			freeTree(root->kids[i]);
+			i++;
+		}
+		free(root);
+	}
+}
+
+
+/*DOT TREE IMPLEMENTATION */
+/* add a \ before leading and trailing double quotes */
+
+char *escape(char *s) {
+   char *s2 = alloc(strlen(s)+4);
+   if (s[0] == '\"') {
+      if (s[strlen(s)-1] != '\"') {
+	 fprintf(stderr, "What is it?!\n");
+	 }
+      sprintf(s2, "\\%s", s);
+      strcat(s2+strlen(s2)-1, "\\\"");
+      return s2;
+     }
+   else return s;
+}
+
+char *pretty_print_name(struct tree *t) {
+   char *s2 = alloc(40);
+   if (t->leaf == NULL) {
+      sprintf(s2, "%s#%d", t->symbolname, t->prodrule%10);
+      return s2;
+      }
+   else {
+      sprintf(s2,"%s:%d", escape(t->leaf->text), t->leaf->category);
+      return s2;
+      }
+}
+
+void print_branch(struct tree *t, FILE *f) {
+   fprintf(f, "N%d [shape=box label=\"%s\"];\n", t->id, pretty_print_name(t));
+}
+
+char *yyname(int);
+
+void print_leaf(struct tree *t, FILE *f) {
+   char * s = yyname(t->leaf->category);
+   // print_branch(t, f);
+   fprintf(f, "N%d [shape=box style=dotted label=\" %s \\n ", t->id, s);
+   if(t->leaf->sval != NULL){
+	   fprintf(f, "text = %s \\l lineno = %d \\l \"];\n", escape(t->leaf->sval), t->leaf->lineno);
+   }else{
+	   fprintf(f, "text = %s \\l lineno = %d \\l \"];\n", escape(t->leaf->text), t->leaf->lineno);
+	}
+}
+
+void print_graph2(struct tree *t, FILE *f) {
+   int i;
+   if (t->leaf != NULL) {
+      print_leaf(t, f);
+      return;
+      }
+   /* not a leaf ==> internal node */
+   print_branch(t, f);
+   for(i=0; i < t->nkids; i++) {
+      if (t->kids[i] != NULL) {
+         fprintf(f, "N%d -> N%d;\n", t->id, t->kids[i]->id);
+	 print_graph2(t->kids[i], f);
+	 }
+      else { /* NULL kid, epsilon production or something */
+         fprintf(f, "N%d -> N%d%d;\n", t->id, t->id, serial);
+	 fprintf(f, "N%d%d [label=\"%s\"];\n", t->id, serial, "Empty rule");
+	 serial++;
+	 }
+      }
+}
+
+void print_graph(struct tree *t, char *filename){
+      FILE *f = fopen(filename, "w"); /* should check for NULL */
+      fprintf(f, "digraph {\n");
+      print_graph2(t, f);
+      fprintf(f,"}\n");
+      fclose(f);
+}
+/*
+ * symt.c
+ * TO DO: Undefined errors
+ */
+
+/*
+ * The functions in this file maintain a hash table mapping strings to
+ *   symbol table entries.
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "symt.h"
+#include "tree.h"
+#include "j0gram.tab.h"
+#define SYMTAB_SIZE 7
+/*
+ * new_st - construct symbol (hash) table.
+ *  Allocate space first for the structure, then
+ *  for the array of buckets.
+ */
+SymbolTable new_st(int nbuckets)
+   {
+   //int h;
+   SymbolTable rv;
+   rv = (SymbolTable) alloc(sizeof(struct sym_table));
+   rv->tbl = (struct sym_entry **)
+      alloc((unsigned int)(nbuckets * sizeof(struct sym_entry *)));
+   rv->nBuckets = nbuckets;
+   rv->nEntries = 0;
+   return rv;
+   }
+
+/*
+ * delete_st - destruct symbol table.
+ */
+void delete_st(SymbolTable st)
+   {
+   SymbolTableEntry se, se1;
+   int h;
+   for (h = 0; h < st->nBuckets; ++h)
+      for (se = st->tbl[h]; se != NULL; se = se1) {
+		  if(se->table != NULL){
+	 			delete_st(se->table);
+	 		}
+         se1 = se->next;
+	 	 free((char *)se->s); /* strings in the table were all strdup'ed. */
+         free((char *)se);
+    }
+   free((char *)st->tbl);
+   free((char *)st);
+   }
+
+/*
+ * Compute hash value.
+ */
+int hash(SymbolTable st, char *s)
+{
+   register int h = 0;
+   register char c;
+   while ((c = *s++)) {
+      h += c & 0377;
+      h *= 37;
+      }
+   if (h < 0) h = -h;
+   return h % st->nBuckets;
+}
+
+/*
+ * Insert a symbol into a symbol table.
+ */
+int insert_sym(SymbolTable st, char *s)// typeptr t, ask about this third argument
+{
+   //register int i;
+   int h;
+   struct sym_entry *se;
+   //int l;
+   h = hash(st, s);
+   for (se = st->tbl[h]; se != NULL; se = se->next)
+      if (!strcmp(s, se->s)) {
+         return 0;
+         }
+
+   /*
+    * The string is not in the table. Add the copy from the
+    *  buffer to the table.
+    */
+   se = (SymbolTableEntry)alloc((unsigned int) sizeof (struct sym_entry));
+   se->next = st->tbl[h];
+   se->table = NULL;
+   st->tbl[h] = se;
+   se->s = strdup(s);
+   //se->type = t;
+   st->nEntries++;
+   return 1;
+}
+
+/*
+ * lookup_st - search the symbol table for a given symbol, return its entry.
+ */
+SymbolTableEntry lookup_st(SymbolTable st, char *s)
+   {
+   //register int i;
+   int h;
+   SymbolTableEntry se;
+
+   h = hash(st, s);
+   for (se = st->tbl[h]; se != NULL; se = se->next)
+      if (!strcmp(s, se->s)) {
+         return se;
+         }
+   return NULL;
+   }
+
+
+
+char * alloc(int n)
+{
+   char *a = calloc(n, sizeof(char));
+   if (a == NULL) {
+      fprintf(stderr, "alloc(%d): out of memory\n", (int)n);
+      exit(-1);
+      }
+   return a;
+}
+
+void enter_newscope(char *s)
+{
+   /* allocate a new symbol table */
+   SymbolTable table = new_st(SYMTAB_SIZE);
+   /* insert s into current symbol table */
+   insert_sym(current, s);
+   /* attach new symbol table to s's symbol table in the current symbol table*/
+	//Work on this
+	//table = lookup_st(current, s)->table;
+	lookup_st(current, s)->table = table;
+
+   /* push new symbol on the stack, making it the current symbol table */
+   pushscope(table);
+}
+
+void populate_symboltables(struct tree * n)
+{
+   int i;
+   if (n == NULL) return;
+   //printf("%s\n", n->symbolname);
+   /* pre-order activity */
+  // printf("%s\n", n->symbolname);
+  //popscope to escape
+   switch (n->prodrule) {
+   case 1090: case 1091: {  /* MethodDeclarator whatever production rule(s) enter a function scope */
+	 redeclaration_error(current, n->kids[0]);
+	 method_count++;
+	 enter_newscope(n->kids[0]->symbolname);
+     break;
+     }
+	case 1110: { //formal param
+		redeclaration_error(current, n->kids[1]);
+		insert_sym(current, n->kids[1]->symbolname);
+		break;
+	}
+	case 1111: {// formal param array
+		redeclaration_error(current, n->kids[1]);
+		insert_sym(current, n->kids[1]->symbolname);
+		break;
+	}
+   case 1000: {  /* ClassDecl whatever production rule(s) enter a function scope */
+     enter_newscope(n->kids[0]->symbolname);
+     break;
+     }
+   case 1240: case 1250:  { //WhileStmt ForStmt whatever production rule(s) enter a struct scope
+	 block_count++;
+  	 /*if(block_count > 1)
+  	 	popscope();*/
+	char* temp = (char*) alloc(sizeof(char) * BUFF);
+	sprintf(temp, "%s%d", n->symbolname, block_count);
+	n->symbolname = realloc(n->symbolname, strlen(temp) * BUFF);
+	strcpy(n->symbolname, temp);
+    enter_newscope(n->symbolname);
+	free(temp);
+     break;
+ 		} /* label of new struct  inside enter new scope*/
+	case 1241:{//empty while statement
+		block_count++;
+     	 /*if(block_count > 1)
+     	 	popscope();*/
+   		char* temp = (char*) alloc(sizeof(char) * BUFF);
+   		sprintf(temp, "%s%d", n->symbolname, block_count);
+   		n->symbolname = realloc(n->symbolname, strlen(temp) * BUFF);
+   		strcpy(n->symbolname, temp);
+        insert_sym(current, n->symbolname);
+		free(temp);
+        break;
+	}
+   case 1030: case 1031: case 1170: { /* "FieldDecl", "LocalVarDecl" whatever production rule(s) designate a variable declaration*/
+       /* figure out which kid is a "list" of variables */
+	   /*Check */
+	   if(n->kids[0]->prodrule == 1050){
+		   dovariabledeclarator(n->kids[1]);
+	   }else{
+		    redeclaration_error(current, n->kids[1]);
+		   	insert_sym(current, n->kids[1]->symbolname);
+	   }
+       /* walk through the subtree that is the list of variables */
+            /* for each variable, insert it into the current symbol table*/
+       break;
+   	}
+	case 1171: case 1172:{//more local var decls
+		redeclaration_error(current, n->kids[1]);
+		insert_sym(current, n->kids[1]->symbolname);
+		break;
+	}
+	case 1173: case 1174:{//local var array decls
+		redeclaration_error(current, n->kids[1]);
+		insert_sym(current, n->kids[1]->symbolname);
+		break;
+	}
+   }
+
+   for (i=0; i<n->nkids; i++){
+      populate_symboltables(n->kids[i]);
+  }
+
+	  /* post-order activity*/
+    switch (n->prodrule) {
+		case 1240: case 1250: {//while statment and for statement
+			popscope();
+			break;
+		}
+		case 1070: { //method decl
+			if(method_count >= 1){
+				popscope();
+			}
+			break;
+		}
+		case 1180:{ //ExprStmt
+			//printf("%d\n", n->kids[0]->kids[0]->prodrule);
+			switch(n->kids[0]->prodrule){
+				case 1390: {
+					if(n->kids[0]->kids[0]->prodrule == 270){
+					if(not_defined_error(current, n->kids[0]->kids[0]) == 0){//LeftHandSide
+					  fprintf(stderr, "Variable not declared error for %s at line %d ",n->kids[0]->kids[0]->symbolname, n->kids[0]->kids[0]->leaf->lineno);
+				  	   semanticerror("Variable not declared error", n->kids[0]->kids[0]);
+					   exit(3);
+						}
+					}else if(n->kids[0]->kids[0]->prodrule == 1430){
+						if(not_defined_error(current, n->kids[0]->kids[0]->kids[0]) == 0){//LeftHandSide
+						  fprintf(stderr, "Variable not declared error for %s at line %d ",n->kids[0]->kids[0]->kids[0]->symbolname, n->kids[0]->kids[0]->kids[0]->leaf->lineno);
+					  	   semanticerror("Variable not declared error", n->kids[0]->kids[0]->kids[0]);
+						   exit(3);
+							}
+					}
+					if(not_defined_error(current, n->kids[0]->kids[2]) == 0 && n->kids[0]->kids[2]->prodrule == IDENTIFIER){
+						fprintf(stderr, "Variable not declared error for %s at line %d ",n->kids[0]->kids[2]->symbolname, n->kids[0]->kids[2]->leaf->lineno);
+						semanticerror("Variable not declared error", n->kids[0]->kids[2]);
+						exit(3);
+					}else if(n->kids[0]->kids[2]->prodrule == 1340){//AddExpr
+						for(int i = 0; i < n->kids[0]->kids[2]->nkids; i++){
+							if(not_defined_error(current, n->kids[0]->kids[2]->kids[i]) == 0 && n->kids[0]->kids[2]->kids[i]->prodrule == IDENTIFIER){
+								fprintf(stderr, "Variable not declared error for %s at line %d ",n->kids[0]->kids[2]->kids[i]->symbolname, n->kids[0]->kids[2]->kids[i]->leaf->lineno);
+								semanticerror("Variable not declared error", n->kids[0]->kids[2]);
+								exit(3);
+							}
+						}
+					}
+					break;
+				}
+				case 1391: case 1392:{ //Assignment Expressions
+					if(not_defined_error(current, n->kids[0]->kids[0]) == 0){//LeftHandSide
+					  fprintf(stderr, "Variable not declared error for %s at line %d ",n->kids[0]->kids[0]->symbolname, n->kids[0]->kids[0]->leaf->lineno);
+				  	   semanticerror("Variable not declared error", n->kids[0]->kids[0]);
+					   exit(3);
+					}
+					break;
+				}
+				case 1310: case 1311: case 1314:{//MethodCall
+					if(n->kids[0]->kids[0]->prodrule != 1040 && not_defined_error(current, n->kids[0]->kids[0]) == 0){//QualifiedName
+						fprintf(stderr, "Variable not declared error for %s at line %d ",n->kids[0]->kids[0]->symbolname, n->kids[0]->kids[0]->leaf->lineno);
+   				  	   semanticerror("Variable not declared error", n->kids[0]->kids[0]);
+   					   exit(3);
+				   }else if(n->kids[0]->kids[0]->prodrule == 1040)
+				   		qualified_name(current, n->kids[0]->kids[0]);
+					if(n->kids[0]->nkids > 1){
+						if(not_defined_error(current, n->kids[0]->kids[1]) == 0){
+							fprintf(stderr, "Variable not declared error for %s at line %d ",n->kids[0]->kids[1]->symbolname, n->kids[0]->kids[1]->leaf->lineno);
+		    				semanticerror("Variable not declared error", n->kids[0]->kids[1]);
+		    				exit(3);
+							}
+						}
+					break;
+				}
+				case 1312: case 1313:{//still MethodCall
+					if(not_defined_error(current, n->kids[0]->kids[0]) == 0){
+					   fprintf(stderr, "Variable not declared error for %s at line %d ",n->kids[0]->kids[0]->symbolname, n->kids[0]->kids[0]->leaf->lineno);
+   				  	   semanticerror("Variable not declared error", n->kids[0]->kids[0]);
+   					   exit(3);
+					}
+					if(not_defined_error(current, n->kids[0]->kids[1]) == 0){
+						fprintf(stderr, "Variable not declared error for %s at line %d ",n->kids[0]->kids[0]->symbolname, n->kids[0]->kids[0]->leaf->lineno);
+    				  	   semanticerror("Variable not declared error", n->kids[0]->kids[0]);
+    					   exit(3);
+					}
+					if(n->kids[0]->nkids > 2){
+						if(not_defined_error(current, n->kids[0]->kids[2]) == 0){
+							fprintf(stderr, "Variable not declared error for %s at line %d ",n->kids[0]->kids[0]->symbolname, n->kids[0]->kids[0]->leaf->lineno);
+	    				  	   semanticerror("Variable not declared error", n->kids[0]->kids[0]);
+	    					   exit(3);
+						}
+					}
+					break;
+				}
+
+
+			}
+			break;
+		}
+		case 1401:{
+			if(not_defined_error(current, n->kids[1]) == 0){
+				fprintf(stderr, "Variable not declared error for %s at line %d ",n->kids[1]->symbolname, n->kids[1]->leaf->lineno);
+				   semanticerror("Variable not declared error", n->kids[1]);
+				   exit(3);
+			}
+			break;
+		}
+		case 1402:{
+			if(not_defined_error(current, n->kids[1]) == 0){
+				fprintf(stderr, "Variable not declared error for %s at line %d ",n->kids[1]->symbolname, n->kids[1]->leaf->lineno);
+				   semanticerror("Variable not declared error", n->kids[1]);
+				   exit(3);
+			}
+			break;
+		}
+		case 1403:{
+			if(not_defined_error(current, n->kids[0]) == 0){
+				fprintf(stderr, "Variable not declared error for %s at line %d ",n->kids[0]->symbolname, n->kids[0]->leaf->lineno);
+				   semanticerror("Variable not declared error", n->kids[0]);
+				   exit(3);
+			}
+			break;
+		}
+		case 1404:{
+			if(not_defined_error(current, n->kids[0]) == 0){
+				fprintf(stderr, "Variable not declared error for %s at line %d ",n->kids[0]->symbolname, n->kids[0]->leaf->lineno);
+				   semanticerror("Variable not declared error", n->kids[0]);
+				   exit(3);
+			}
+			break;
+		}
+		case 1405:{
+			if(not_defined_error(current, n->kids[0]) == 0){
+				fprintf(stderr, "Variable not declared error for %s at line %d ",n->kids[0]->symbolname, n->kids[0]->leaf->lineno);
+				   semanticerror("Variable not declared error", n->kids[0]);
+				   exit(3);
+			}
+			break;
+		}
+
+	}
+   	/*case 1090: case 1240: case 1250:// MethodDecl we are back out to a node where we entered a subscope :
+		printf("bark\n");
+        popscope();
+        break;
+   	case 1091:
+   		if(strcmp(n->kids[0]->symbolname, "main") != 0){
+			printf("bark\n");
+			popscope();
+		}
+   	break;
+}*/
+}
+
+void dovariabledeclarator(struct tree * n)
+{
+  /* in future look for type information (e.g. array, pointer) modifiers */
+  /* get variable ident */
+	for(int i = 0; i<n->nkids; i++){
+		if(n->kids[i]->prodrule == IDENTIFIER){
+			redeclaration_error(current, n);
+			insert_sym(current, n->kids[i]->symbolname);
+		}
+	}
+}
+
+int redeclaration_error(SymbolTable st, struct tree * n){
+	if(lookup_st(st, n->symbolname)!= NULL){
+	   fprintf(stderr, "Redeclaration error for %s at line %d ",n->symbolname, n->leaf->lineno);
+ 	   semanticerror("Redeclaration error", n);
+ 	   exit(3);
+	}
+	if(st->parent != NULL){
+		return redeclaration_error(st->parent, n);
+	}else{
+		return 0;
+	}
+}
+
+int qualified_name(SymbolTable st, struct tree * n){
+	for(int i = 0; i < n->nkids; i++){
+		if(n->kids[i]->prodrule == 1040){
+			return qualified_name(st, n->kids[i]);
+		}else{
+			if(not_defined_error(st, n->kids[i]) == 0){
+				fprintf(stderr, "Variable not declared error for %s at line %d ",n->kids[i]->symbolname, n->kids[i]->leaf->lineno);
+				semanticerror("Variable not declared error", n->kids[i]);
+				exit(3);
+			}
+		}
+	}
+	return 0;
+}
+
+int not_defined_error(SymbolTable st, struct tree * n){
+	if(lookup_st(st, n->symbolname)!= NULL){
+	   return 1;
+	}
+	if(st->parent != NULL){
+		return not_defined_error(st->parent, n);
+	}else{
+		return 0;
+	}
+}
+
+void printsymbols(SymbolTable st, int level)
+{
+   int i;//, j;
+   SymbolTableEntry ste;
+   if (st == NULL) return;
+   for (i=0;i<st->nBuckets;i++) {
+      for (ste = st->tbl[i]; ste; ste=ste->next) {
+	// for (j=0; j < level; j++) printf("\t");
+	 printf("%s\n", ste->s);
+	 /* if this symbol has a subscope, print it recursively, indented
+	 printsymbols( // subscope symbol table
+                    , level+1);
+          */
+      }
+   }
+	printf("---------------------------------------\n");
+   for (i=0;i<st->nBuckets;i++) {
+      for (ste = st->tbl[i]; ste; ste=ste->next) {
+		  if(ste->table != NULL){
+			  printf("----------symbol table for %s----------\n", ste->s);
+	 			printsymbols(ste->table, level+1);
+	 		}
+	  }
+  }
+}
+
+void semanticerror(char *s, struct tree * n)
+{
+   while (n && (n->nkids > 0))
+   		n=n->kids[0];
+   if (n) {
+     fprintf(stderr, "%s:%d: ", n->leaf->filename, n->leaf->lineno);
+   }
+  fprintf(stderr, "%s", s);
+  if (n && n->prodrule == IDENTIFIER)
+  	fprintf(stderr, " %s", n->leaf->text);
+  fprintf(stderr, "\n");
+  //errors++;
+}
+
+SymbolTable buildglobal(SymbolTable glob){
+	glob = new_st(SYMTAB_SIZE);
+	current = new_st(SYMTAB_SIZE);
+	glob->parent = NULL;
+	insert_sym(glob, "System");
+	insert_sym(glob, "String");
+	lookup_st(glob, "System")->table = new_st(SYMTAB_SIZE);
+	lookup_st(glob, "String")->table = new_st(SYMTAB_SIZE);
+	insert_sym(lookup_st(glob, "System")->table, "out");
+	insert_sym(lookup_st(glob, "System")->table, "in");
+	insert_sym(lookup_st(glob, "String")->table, "charAt");
+	insert_sym(lookup_st(glob, "String")->table, "equals");
+	insert_sym(lookup_st(glob, "String")->table, "compareTo");
+	insert_sym(lookup_st(glob, "String")->table, "length");
+	insert_sym(lookup_st(glob, "String")->table, "toString");
+	lookup_st(lookup_st(glob, "System")->table, "out")->table = new_st(SYMTAB_SIZE);
+	lookup_st(lookup_st(glob, "System")->table, "in")->table = new_st(SYMTAB_SIZE);
+	insert_sym(lookup_st(lookup_st(glob, "System")->table, "out")->table, "print");
+	insert_sym(lookup_st(lookup_st(glob, "System")->table, "out")->table, "println");
+	insert_sym(lookup_st(lookup_st(glob, "System")->table, "in")->table, "read");
+	pushscope(glob);
+	return glob;
+}
+%option noyywrap
+%option noinput
+%option nounput
+
+%{
+#include <stdio.h>
+#include "tree.h"
+#include "j0gram.tab.h"
+extern int yylineno;
+%}
+%%
+\n             		{ yylineno++; }
+"/*"([^*]|"*"+[^/*])*"*"+"/" 	{ yylineno++; }
+"/*"([^*]|"*"+[^/*])*^["*"+"/"] { return alctoken(1);}
+"//".*\r?\n             { yylineno++;}
+[ \t\r\f]+              { ; }
+
+
+"double"               	{ return alctoken(DOUBLE); }
+"else"                 	{ return alctoken(ELSE); }
+"false"                	{ return alctoken(BOOLLIT); }
+"for"                  	{ return alctoken(FOR); }
+"if"                   	{ return alctoken(IF); }
+"int"                  	{ return alctoken(INT);}
+"null"                 	{ return alctoken(NULLVAL); }
+"public"               	{ return alctoken(PUBLIC); }
+"return"               	{ return alctoken(RETURN); }
+"static"               	{ return alctoken(STATIC); }
+"string"               	{ return alctoken(STRING); }
+"true"                 	{ return alctoken(BOOLLIT); }
+"bool"                 	{ return alctoken(BOOL); }
+"char"					{ return alctoken(CHAR); }
+"float"					{ return alctoken(FLOAT); }
+"void"                 	{ return alctoken(VOID); }
+"while"                	{ return alctoken(WHILE); }
+"class"                	{ return alctoken(CLASS); }
+"long"					{ return alctoken(LONG);}
+"System.out.println"	{ return alctoken(PRINT);}
+<<EOF>> 				{ return -1; }
+"break"                	{ return alctoken(1); }
+"abstract" 				{ return alctoken(1); }
+"assert" 				{ return alctoken(1); }
+"byte" 					{ return alctoken(1); }
+"case" 					{ return alctoken(1); }
+"catch" 				{ return alctoken(1); }
+"const" 				{ return alctoken(1); }
+"continue" 				{ return alctoken(1); }
+"default" 				{ return alctoken(1); }
+"do" 					{ return alctoken(1); }
+"enum" 					{ return alctoken(1); }
+"exports" 				{ return alctoken(1); }
+"extends" 				{ return alctoken(1); }
+"final" 				{ return alctoken(1); }
+"finally" 				{ return alctoken(1); }
+"goto" 					{ return alctoken(1); }
+"implements" 			{ return alctoken(1); }
+"import" 				{ return alctoken(1); }
+"instanceof" 			{ return alctoken(1); }
+"interface" 			{ return alctoken(1); }
+"module" 				{ return alctoken(1); }
+"native" 				{ return alctoken(1); }
+"new" 					{ return alctoken(NEW); }
+"package" 				{ return alctoken(1); }
+"private" 				{ return alctoken(1); }
+"protected" 			{ return alctoken(1); }
+"requires" 				{ return alctoken(1); }
+"short" 				{ return alctoken(1); }
+"strictfp" 				{ return alctoken(1); }
+"super" 				{ return alctoken(1); }
+"switch" 				{ return alctoken(1); }
+"synchronized" 			{ return alctoken(1); }
+"this" 					{ return alctoken(1); }
+"throw" 				{ return alctoken(1); }
+"throws" 				{ return alctoken(1); }
+"transient" 			{ return alctoken(1); }
+"try" 					{ return alctoken(1); }
+"var" 					{ return alctoken(1); }
+"volatile" 				{ return alctoken(1); }
+
+"("                    { return alctoken(LPAREN);}
+")"                    { return alctoken(RPAREN);}
+"["                    { return alctoken(LSQUARE);}
+"]"                    { return alctoken(RSQUARE);}
+"{"                    { return alctoken(LCURLY);}
+"}"                    { return alctoken(RCURLY);}
+";"                    { return alctoken(SEMICOLON);}
+":"                    { return alctoken(COLON);}
+"!"                    { return alctoken(LOGICNOT);}
+"*"                    { return alctoken(MULT);}
+"/"                    { return alctoken(DIVIDE);}
+"%"                    { return alctoken(MODULO);}
+"+"                    { return alctoken(ADD);}
+"-"                    { return alctoken(SUBTRACT);}
+"<"                    { return alctoken(LESSTHAN);}
+"<="                   { return alctoken(LESSTHANOREQUAL);}
+">"                    { return alctoken(GREATERTHAN);}
+">="                   { return alctoken(GREATERTHANOREQUAL);}
+"=="                   { return alctoken(ISEQUALTO);}
+"!="                   { return alctoken(NOTEQUALTO);}
+"&&"                   { return alctoken(LOGICALAND);}
+"||"                   { return alctoken(LOGICALOR);}
+"="                    { return alctoken(ASSIGNMENT); }
+"+="                   { return alctoken(INCREMENT); }
+"++"				   { return alctoken(INCREMENT);}
+"-="                   { return alctoken(DECREMENT); }
+"--"				   { return alctoken(DECREMENT); }
+","                    { return alctoken(COMMA); }
+"."                    { return alctoken(PERIOD); }
+
+[0-9]+                 { return alctoken(INTLIT); }
+[0-9]*"."[0-9]*([eE][+-]?[0-9]+)? { return alctoken(DOUBLELIT); }
+([0-9]+)([eE][+-]?([0-9]+))  { return alctoken(DOUBLELIT); }
+\"[^\"]*\"  			{ return alctoken(STRINGLIT); }
+\"[^\"]*[^\"]   		{ return alctoken(1); }
+[A-Za-z0-9_]+   { return alctoken(IDENTIFIER); }
+.              			{ printf("unrecognized character"); }
+%%
+
+
+...
+
+
+%option noyywrap
+%option noinput
+%option nounput
+
+%{
+#include <stdio.h>
+#include "tree.h"
+#include "j0gram.tab.h"
+extern int yylineno;
+%}
+%%
+\n             		{ yylineno++; }
+"/*"([^*]|"*"+[^/*])*"*"+"/" 	{ yylineno++; }
+"/*"([^*]|"*"+[^/*])*^["*"+"/"] { return alctoken(1);}
+"//".*\r?\n             { yylineno++;}
+[ \t\r\f]+              { ; }
+
+
+"double"               	{ return alctoken(DOUBLE); }
+"else"                 	{ return alctoken(ELSE); }
+"false"                	{ return alctoken(BOOLLIT); }
+"for"                  	{ return alctoken(FOR); }
+"if"                   	{ return alctoken(IF); }
+"int"                  	{ return alctoken(INT);}
+"null"                 	{ return alctoken(NULLVAL); }
+"public"               	{ return alctoken(PUBLIC); }
+"return"               	{ return alctoken(RETURN); }
+"static"               	{ return alctoken(STATIC); }
+"string"               	{ return alctoken(STRING); }
+"true"                 	{ return alctoken(BOOLLIT); }
+"bool"                 	{ return alctoken(BOOL); }
+"char"					{ return alctoken(CHAR); }
+"float"					{ return alctoken(FLOAT); }
+"void"                 	{ return alctoken(VOID); }
+"while"                	{ return alctoken(WHILE); }
+"class"                	{ return alctoken(CLASS); }
+"long"					{ return alctoken(LONG);}
+"System.out.println"	{ return alctoken(PRINT);}
+<<EOF>> 				{ return -1; }
+"break"                	{ return alctoken(1); }
+"abstract" 				{ return alctoken(1); }
+"assert" 				{ return alctoken(1); }
+"byte" 					{ return alctoken(1); }
+"case" 					{ return alctoken(1); }
+"catch" 				{ return alctoken(1); }
+"const" 				{ return alctoken(1); }
+"continue" 				{ return alctoken(1); }
+"default" 				{ return alctoken(1); }
+"do" 					{ return alctoken(1); }
+"enum" 					{ return alctoken(1); }
+"exports" 				{ return alctoken(1); }
+"extends" 				{ return alctoken(1); }
+"final" 				{ return alctoken(1); }
+"finally" 				{ return alctoken(1); }
+"goto" 					{ return alctoken(1); }
+"implements" 			{ return alctoken(1); }
+"import" 				{ return alctoken(1); }
+"instanceof" 			{ return alctoken(1); }
+"interface" 			{ return alctoken(1); }
+"module" 				{ return alctoken(1); }
+"native" 				{ return alctoken(1); }
+"new" 					{ return alctoken(NEW); }
+"package" 				{ return alctoken(1); }
+"private" 				{ return alctoken(1); }
+"protected" 			{ return alctoken(1); }
+"requires" 				{ return alctoken(1); }
+"short" 				{ return alctoken(1); }
+"strictfp" 				{ return alctoken(1); }
+"super" 				{ return alctoken(1); }
+"switch" 				{ return alctoken(1); }
+"synchronized" 			{ return alctoken(1); }
+"this" 					{ return alctoken(1); }
+"throw" 				{ return alctoken(1); }
+"throws" 				{ return alctoken(1); }
+"transient" 			{ return alctoken(1); }
+"try" 					{ return alctoken(1); }
+"var" 					{ return alctoken(1); }
+"volatile" 				{ return alctoken(1); }
+
+"("                    { return alctoken(LPAREN);}
+")"                    { return alctoken(RPAREN);}
+"["                    { return alctoken(LSQUARE);}
+"]"                    { return alctoken(RSQUARE);}
+"{"                    { return alctoken(LCURLY);}
+"}"                    { return alctoken(RCURLY);}
+";"                    { return alctoken(SEMICOLON);}
+":"                    { return alctoken(COLON);}
+"!"                    { return alctoken(LOGICNOT);}
+"*"                    { return alctoken(MULT);}
+"/"                    { return alctoken(DIVIDE);}
+"%"                    { return alctoken(MODULO);}
+"+"                    { return alctoken(ADD);}
+"-"                    { return alctoken(SUBTRACT);}
+"<"                    { return alctoken(LESSTHAN);}
+"<="                   { return alctoken(LESSTHANOREQUAL);}
+">"                    { return alctoken(GREATERTHAN);}
+">="                   { return alctoken(GREATERTHANOREQUAL);}
+"=="                   { return alctoken(ISEQUALTO);}
+"!="                   { return alctoken(NOTEQUALTO);}
+"&&"                   { return alctoken(LOGICALAND);}
+"||"                   { return alctoken(LOGICALOR);}
+"="                    { return alctoken(ASSIGNMENT); }
+"+="                   { return alctoken(INCREMENT); }
+"++"				   { return alctoken(INCREMENT);}
+"-="                   { return alctoken(DECREMENT); }
+"--"				   { return alctoken(DECREMENT); }
+","                    { return alctoken(COMMA); }
+"."                    { return alctoken(PERIOD); }
+
+[0-9]+                 { return alctoken(INTLIT); }
+[0-9]*"."[0-9]*([eE][+-]?[0-9]+)? { return alctoken(DOUBLELIT); }
+([0-9]+)([eE][+-]?([0-9]+))  { return alctoken(DOUBLELIT); }
+\"[^\"]*\"  			{ return alctoken(STRINGLIT); }
+\"[^\"]*[^\"]   		{ return alctoken(1); }
+[A-Za-z0-9_]+   { return alctoken(IDENTIFIER); }
+.              			{ printf("unrecognized character"); }
+%%
+%{
+#include "tree.h"
+#include "j0gram.tab.h"
+extern int yylex(void);
+extern void yyerror(char *);
+extern struct tree *root;
+//extern static const char *const yytname[];
+#undef YYDEBUG
+#define YYDEBUG 1
+%}
+%union {
+   struct tree *treeptr;
+}
+
+
+%token <treeptr> BAD_TOKEN
+%token <treeptr> DOUBLE
+%token <treeptr> ELSE
+%token <treeptr> FOR
+%token <treeptr> IF
+%token <treeptr> INT
+%token <treeptr> RETURN
+%token <treeptr> VOID
+%token <treeptr> WHILE
+%token <treeptr> CHAR
+%token <treeptr> FLOAT
+%token <treeptr> LONG
+%token <treeptr> IDENTIFIER
+%token <treeptr> CLASSNAME
+%token <treeptr> CLASS
+%token <treeptr> STRING
+%token <treeptr> BOOL
+%token <treeptr> INTLIT
+%token <treeptr> DOUBLELIT
+%token <treeptr> STRINGLIT
+%token <treeptr> BOOLLIT
+%token <treeptr> NULLVAL
+%token <treeptr> LESSTHANOREQUAL
+%token <treeptr> GREATERTHANOREQUAL
+%token <treeptr> ISEQUALTO
+%token <treeptr> NOTEQUALTO
+%token <treeptr> LOGICALAND
+%token <treeptr> LOGICALOR
+%token <treeptr> LOGICNOT
+%token <treeptr> GREATERTHAN
+%token <treeptr> LESSTHAN
+%token <treeptr> MODULO
+%token <treeptr> MULT
+%token <treeptr> DIVIDE
+%token <treeptr> ADD
+%token <treeptr> SUBTRACT
+%token <treeptr> PERIOD
+%token <treeptr> LPAREN
+%token <treeptr> RPAREN
+%token <treeptr> LSQUARE
+%token <treeptr> RSQUARE
+%token <treeptr> LCURLY
+%token <treeptr> RCURLY
+%token <treeptr> COMMA
+%token <treeptr> SEMICOLON
+%token <treeptr> ASSIGNMENT
+%token <treeptr> COLON
+%token <treeptr> INCREMENT
+%token <treeptr> DECREMENT
+%token <treeptr> PUBLIC
+%token <treeptr> STATIC
+%token <treeptr> PRINT
+
+%type <treeptr> ClassDecl
+%type <treeptr> ClassBody
+%type <treeptr> ClassBodyDecls
+%type <treeptr> ClassBodyDecl
+%type <treeptr> FieldDecl
+%type <treeptr> Type
+%type <treeptr> Name
+%type <treeptr> QualifiedName
+%type <treeptr> VarDecls
+%type <treeptr> VarDeclarator
+%type <treeptr> MethodDecl
+%type <treeptr> MethodHeader
+%type <treeptr> MethodReturnVal
+%type <treeptr> MethodDeclarator
+%type <treeptr> FormalParmListOpt
+%type <treeptr> FormalParmList
+%type <treeptr> FormalParm
+%type <treeptr> ConstructorDecl
+%type <treeptr> ConstructorDeclarator
+%type <treeptr> ArgListOpt
+%type <treeptr> Block
+%type <treeptr> BlockStmtsOpt
+%type <treeptr> BlockStmts
+%type <treeptr> BlockStmt
+%type <treeptr> LocalVarDeclStmt
+%type <treeptr> LocalVarDecl
+%type <treeptr> StmtWithoutTrailingStmt
+%type <treeptr> Stmt
+%type <treeptr> ExprStmt
+%type <treeptr> StmtExpr
+%type <treeptr> IfThenStmt
+%type <treeptr> IfThenElseStmt
+%type <treeptr> IfThenElseIfStmt
+%type <treeptr> ElseIfSequence
+%type <treeptr> ElseIfStmt
+%type <treeptr> WhileStmt
+%type <treeptr> ForStmt
+%type <treeptr> ForInit
+%type <treeptr> ExprOpt
+%type <treeptr> ForUpdate
+%type <treeptr> StmtExprList
+%type <treeptr> ReturnStmt
+%type <treeptr> Primary
+%type <treeptr> Literal
+%type <treeptr> ArgList
+%type <treeptr> FieldAccess
+%type <treeptr> MethodCall
+%type <treeptr> PostFixExpr
+%type <treeptr> UnaryExpr
+%type <treeptr> MulExpr
+%type <treeptr> AddExpr
+%type <treeptr> RelOp
+%type <treeptr> RelExpr
+%type <treeptr> EqExpr
+%type <treeptr> CondAndExpr
+%type <treeptr> CondOrExpr
+%type <treeptr> Expr
+%type <treeptr> Assignment
+%type <treeptr> LeftHandSide
+%type <treeptr> AssignOp
+%type <treeptr> Print
+%type <treeptr> IncDec
+%token <treeptr> NEW
+%type <treeptr> InstantiationExpr
+%%
+
+
+ClassDecl: PUBLIC CLASS IDENTIFIER ClassBody {$$ = alctree(1000, "ClassDecl", 2, $3, $4);
+														root = $$;	freeTree($1); freeTree($2); };
+
+ClassBody: LCURLY ClassBodyDecls RCURLY {$$ = alctree(1010, "ClassBody", 1, $2); freeTree($1); freeTree($3);}
+	| LCURLY RCURLY {$$ = NULL; freeTree($1); freeTree($2);} ;
+ClassBodyDecls: ClassBodyDecl | ClassBodyDecls ClassBodyDecl  {$$ = alctree(1020, "ClassBodyDecls", 2, $1, $2);};
+ClassBodyDecl: FieldDecl | MethodDecl | ConstructorDecl ;
+
+FieldDecl: PUBLIC STATIC Type VarDecls SEMICOLON {$$ = alctree(1030, "FieldDecl", 2, $3, $4); freeTree($1); freeTree($2); freeTree($5);}
+| PUBLIC STATIC Type VarDeclarator ASSIGNMENT ExprStmt SEMICOLON {$$ = alctree(1031, "FieldDecl", 3, $3, $4, $6); freeTree($1); freeTree($2); freeTree($5); freeTree($7);};
+Type: INT | DOUBLE | BOOL | STRING | FLOAT | CHAR | LONG | Name;
+Name: IDENTIFIER | QualifiedName ;
+QualifiedName: Name PERIOD IDENTIFIER {$$ = alctree(1040, "QualifiedName", 2, $1, $3); freeTree($2);};
+VarDecls: VarDeclarator | VarDecls COMMA VarDeclarator {$$ = alctree(1050, "VarDecls", 2, $1, $3); freeTree($2); } ;
+VarDeclarator: IDENTIFIER;
+
+
+...
+
+
+%type <treeptr> UnaryExpr
+%type <treeptr> MulExpr
+%type <treeptr> AddExpr
+%type <treeptr> RelOp
+%type <treeptr> RelExpr
+%type <treeptr> EqExpr
+%type <treeptr> CondAndExpr
+%type <treeptr> CondOrExpr
+%type <treeptr> Expr
+%type <treeptr> Assignment
+%type <treeptr> LeftHandSide
+%type <treeptr> AssignOp
+%type <treeptr> Print
+%type <treeptr> IncDec
+%token <treeptr> NEW
+%type <treeptr> InstantiationExpr
+%%
+
+
+ClassDecl: PUBLIC CLASS IDENTIFIER ClassBody {$$ = alctree(1000, "ClassDecl", 2, $3, $4);
+														root = $$;	freeTree($1); freeTree($2); };
+
+ClassBody: LCURLY ClassBodyDecls RCURLY {$$ = alctree(1010, "ClassBody", 1, $2); freeTree($1); freeTree($3);}
+	| LCURLY RCURLY {$$ = NULL; freeTree($1); freeTree($2);} ;
+ClassBodyDecls: ClassBodyDecl | ClassBodyDecls ClassBodyDecl  {$$ = alctree(1020, "ClassBodyDecls", 2, $1, $2);};
+ClassBodyDecl: FieldDecl | MethodDecl | ConstructorDecl ;
+
+FieldDecl: PUBLIC STATIC Type VarDecls SEMICOLON {$$ = alctree(1030, "FieldDecl", 2, $3, $4); freeTree($1); freeTree($2); freeTree($5);}
+| PUBLIC STATIC Type VarDeclarator ASSIGNMENT ExprStmt SEMICOLON {$$ = alctree(1031, "FieldDecl", 3, $3, $4, $6); freeTree($1); freeTree($2); freeTree($5); freeTree($7);};
+Type: INT | DOUBLE | BOOL | STRING | FLOAT | CHAR | LONG | Name;
+Name: IDENTIFIER | QualifiedName ;
+QualifiedName: Name PERIOD IDENTIFIER {$$ = alctree(1040, "QualifiedName", 2, $1, $3); freeTree($2);};
+VarDecls: VarDeclarator | VarDecls COMMA VarDeclarator {$$ = alctree(1050, "VarDecls", 2, $1, $3); freeTree($2); } ;
+VarDeclarator: IDENTIFIER;
+
+MethodDecl: MethodHeader Block {$$ = alctree(1070, "MethodDecl", 2, $1, $2);};
+MethodHeader: PUBLIC STATIC MethodReturnVal MethodDeclarator {$$ = alctree(1080, "MethodHeader", 2, $3, $4); freeTree($1); freeTree($2);}
+	|PUBLIC STATIC Type MethodDeclarator {$$ = alctree(1081, "MethodHeader", 2, $3, $4); freeTree($1); freeTree($2);}
+	|PUBLIC STATIC Type LPAREN RPAREN MethodDeclarator {$$ = alctree(1082, "MethodHeader", 2, $3, $4); freeTree($1); freeTree($2);};
+MethodReturnVal: VOID;
+MethodDeclarator: IDENTIFIER LPAREN FormalParmListOpt RPAREN {$$ = alctree(1090, "MethodDeclarator", 2, $1, $3); freeTree($2); freeTree($4);} | IDENTIFIER LPAREN RPAREN {$$ = alctree(1091, "MethodDeclarator", 1, $1); freeTree($2); freeTree($3);};
+FormalParmListOpt: FormalParmList | { $$ = NULL; };
+FormalParmList: FormalParm | FormalParm COMMA FormalParmList {$$ = alctree(1500, "FormalParmList", 2, $1, $3); freeTree($2);};
+FormalParm: Type VarDeclarator {$$ = alctree(1110, "FormalParm", 2, $1, $2);}
+			| Type LSQUARE RSQUARE VarDeclarator{$$ = alctree(1111, "FormalParm", 2, $1, $4); freeTree($2); freeTree($3);};
+
+ConstructorDecl: ConstructorDeclarator Block {$$ = alctree(1120, "ConstructorDecl", 2, $1, $2);};
+ConstructorDeclarator: PUBLIC STATIC IDENTIFIER LPAREN FormalParmListOpt RPAREN {$$ = alctree(1130, "ConstructorDeclarator", 2, $1, $3); freeTree($2); freeTree($4);};
+ArgListOpt:  ArgList | { $$ = NULL; } ;
+
+Block: LCURLY BlockStmtsOpt RCURLY {$$ = alctree(1140, "Block", 1, $2); freeTree($1); freeTree($3);};
+BlockStmtsOpt: BlockStmts | { $$ = NULL; };
+BlockStmts:  BlockStmt BlockStmts   {$$ = alctree(1150, "BlockStmts", 2, $1, $2);} | BlockStmt;
+BlockStmt:   LocalVarDeclStmt | Stmt ;
+
+LocalVarDeclStmt: LocalVarDecl SEMICOLON {$$ = alctree(1160, "LocalVarDeclStmt", 1, $1); freeTree($2);};
+LocalVarDecl: Type VarDecls {$$ = alctree(1170, "LocalVarDecl", 2, $1, $2);}
+	| Type VarDeclarator ASSIGNMENT Literal {$$ = alctree(1171, "LocalVarDecl", 3, $1, $2, $4); freeTree($3);}
+	| Type VarDeclarator ASSIGNMENT InstantiationExpr {$$ = alctree(1172, "LocalVarDecl", 3, $1, $2, $4); freeTree($3);}
+	| Type LSQUARE RSQUARE VarDeclarator ASSIGNMENT InstantiationExpr {$$ = alctree(1173, "LocalVarDecl", 3, $1, $4, $6); freeTree($2); freeTree($3); freeTree($5);}
+	| Type LSQUARE RSQUARE VarDeclarator {$$ = alctree(1174, "LocalVarDecl", 2, $1, $4); freeTree($2); freeTree($3);};
+
+StmtWithoutTrailingStmt: Block | SEMICOLON | ExprStmt | ReturnStmt ;
+Stmt: StmtWithoutTrailingStmt | IfThenStmt | IfThenElseStmt | IfThenElseIfStmt
+      | WhileStmt | ForStmt | Print;
+
+ExprStmt: StmtExpr SEMICOLON {$$ = alctree(1180, "ExprStmt", 1, $1); freeTree($2);};
+
+StmtExpr: Assignment | MethodCall;
+
+IfThenStmt: IF LPAREN Expr RPAREN Block {$$ = alctree(1190, "IfThenStmt", 2, $3, $5); freeTree($1); freeTree($2); freeTree($4);};
+IfThenElseStmt: IF LPAREN Expr RPAREN Block ELSE Block {$$ = alctree(1200, "IfThenElseStmt", 3, $3, $5, $7); freeTree($1); freeTree($2); freeTree($4); freeTree($6);};
+IfThenElseIfStmt: IF LPAREN Expr RPAREN Block ElseIfSequence {$$ = alctree(1210, "IfThenElseIfStmt", 3, $3, $5, $6); freeTree($1); freeTree($2); freeTree($4);}
+       |  IF LPAREN Expr RPAREN Block ElseIfSequence ELSE Block {$$ = alctree(1211, "IfThenElseIfStmt", 4, $3, $5, $6, $8); freeTree($1); freeTree($2); freeTree($4); freeTree($7);};
+
+ElseIfSequence: ElseIfStmt | ElseIfSequence ElseIfStmt {$$ = alctree(1220, "ElseIfSequence", 2, $1, $2);};
+ElseIfStmt: ELSE IfThenStmt {$$ = alctree(1230, "ElseIfStmt", 1, $2); freeTree($1);} ;
+WhileStmt: WHILE LPAREN Expr RPAREN Stmt {$$ = alctree(1240, "WhileStmt", 2, $3, $5); freeTree($1); freeTree($2); freeTree($4);}
+	| WHILE LPAREN Expr RPAREN LCURLY RCURLY {$$ = alctree(1241, "WhileStmt", 1, $3); freeTree($1); freeTree($2); freeTree($4); freeTree($5); freeTree($6);};
+
+ForStmt: FOR LPAREN ForInit SEMICOLON ExprOpt SEMICOLON ForUpdate RPAREN Block { $$ = alctree(1250, "ForStmt", 4, $3, $5, $7, $9); freeTree($1); freeTree($2); freeTree($4); freeTree($6); freeTree($8);}
+		| FOR LPAREN SEMICOLON ExprOpt SEMICOLON ForUpdate RPAREN Block { $$ = alctree(1251, "ForStmt", 3, $4, $6, $8); freeTree($1); freeTree($2); freeTree($3); freeTree($5); freeTree($7);}
+		| FOR LPAREN SEMICOLON ExprOpt SEMICOLON RPAREN Block { $$ = alctree(1252, "ForStmt", 2, $4, $7); freeTree($1); freeTree($2); freeTree($3); freeTree($5); freeTree($6);};
+
+ForInit: StmtExprList | LocalVarDecl ;
+ExprOpt: Expr |  { $$ = NULL; } ;
+ForUpdate: StmtExprList | { $$ = NULL; } ;
+
+StmtExprList: StmtExpr | StmtExprList COMMA StmtExpr {$$ = alctree(1260, "StmtExprList", 2, $1, $3); freeTree($2);};
+
+ReturnStmt: RETURN ExprOpt SEMICOLON {$$ = alctree(1270, "ReturnStmt", 1, $2); freeTree($1); freeTree($3);}
+			| RETURN SEMICOLON;
+
+Primary:  Literal
+	| LPAREN Expr RPAREN {$$ = alctree(1280, "Primary", 1, $2); freeTree($1); freeTree($3);}
+	| FieldAccess | MethodCall ;
+Literal: INTLIT	| DOUBLELIT | BOOLLIT | STRINGLIT | NULLVAL ;
+InstantiationExpr: NEW Type LSQUARE INTLIT RSQUARE {$$ = alctree(1410, "InstantiationExpr", 2, $2, $4); freeTree($1); freeTree($3); freeTree($5);}
+	| NEW Type LSQUARE RSQUARE {$$ = alctree(1411, "InstantiationExpr", 1, $2); freeTree($1); freeTree($3); freeTree($4);};
+ArgList: Expr
+	| ArgList COMMA Expr {$$ = alctree(1290, "ArgList", 2, $1, $3); freeTree($2);};
+FieldAccess: Primary PERIOD IDENTIFIER {$$ = alctree(1300, "FieldAccess", 2, $1, $3); freeTree($2);};
+MethodCall: Name LPAREN ArgListOpt RPAREN {$$ = alctree(1310, "MethodCall", 2, $1, $3); freeTree($2); freeTree($4);}
+	| Name LPAREN RPAREN {$$ = alctree(1314, "MethodCall", 1, $1); freeTree($2); freeTree($3);}
+	| Name LCURLY ArgListOpt RCURLY {$$ = alctree(1311, "MethodCall", 2, $1, $3); freeTree($2); freeTree($4);}
+	| Primary PERIOD IDENTIFIER LPAREN ArgListOpt RPAREN {$$ = alctree(1312, "MethodCall", 3, $1, $3, $5); freeTree($2); freeTree($4); freeTree($6);}
+	| Primary PERIOD IDENTIFIER LCURLY ArgListOpt RCURLY {$$ = alctree(1313, "MethodCall", 3, $1, $3, $5); freeTree($2); freeTree($4); freeTree($6);};
+PostFixExpr: Primary | Name ;
+UnaryExpr:  SUBTRACT UnaryExpr {$$ = alctree(1320, "UnaryExpr", 2, $1, $2);}
+	| LOGICNOT UnaryExpr {$$ = alctree(1321, "UnaryExpr", 2, $1, $2);}
+	| PostFixExpr ;
+MulExpr: UnaryExpr
+	| MulExpr MULT UnaryExpr {$$ = alctree(1330, "MulExpr", 2, $1, $3); freeTree($2);}
+    | MulExpr DIVIDE UnaryExpr  {$$ = alctree(1331, "MulExpr", 2, $1, $3); freeTree($2);}
+	| MulExpr MODULO UnaryExpr  {$$ = alctree(1332, "MulExpr", 2, $1, $3); freeTree($2);};
+AddExpr: MulExpr
+	| AddExpr ADD MulExpr {$$ = alctree(1340, "AddExpr", 2, $1, $3); freeTree($2);}
+	| AddExpr SUBTRACT MulExpr {$$ = alctree(1341, "AddExpr", 2, $1, $3); freeTree($2);};
+RelOp: LESSTHANOREQUAL | GREATERTHANOREQUAL | LESSTHAN | GREATERTHAN ;
+RelExpr: AddExpr | RelExpr RelOp AddExpr  {$$ = alctree(1350, "RelExpr", 3, $1, $2, $3);};
+
+EqExpr: RelExpr
+	| EqExpr ISEQUALTO RelExpr  {$$ = alctree(1360, "EqExpr", 2, $1, $3); freeTree($2);}
+	| EqExpr NOTEQUALTO RelExpr {$$ = alctree(1361, "EqExpr", 2, $1, $3); freeTree($2);};
+CondAndExpr: EqExpr
+	| CondAndExpr LOGICALAND EqExpr {$$ = alctree(1370, "CondAndExpr", 2, $1, $3); freeTree($2);} ;
+CondOrExpr: CondAndExpr
+	| CondOrExpr LOGICALOR CondAndExpr {$$ = alctree(1380, "CondOrExpr", 2, $1, $3);freeTree($2);} ;
+
+Expr: CondOrExpr | Assignment;
+Assignment: LeftHandSide AssignOp Expr {$$ = alctree(1390, "Assignment", 3, $1, $2, $3);}
+	| LeftHandSide IncDec {$$ = alctree(1391, "Assignment", 2, $1, $2);}
+	| LeftHandSide ASSIGNMENT InstantiationExpr {$$ = alctree(1392, "Assignment", 2, $1, $3); freeTree($2);};
+LeftHandSide: LocalVarDecl | Name | FieldAccess | Name LSQUARE INTLIT RSQUARE {$$ = alctree(1430, "LeftHandSide", 2, $1, $3); freeTree($2); freeTree($4);};
+AssignOp: ASSIGNMENT | INCREMENT | DECREMENT ;
+IncDec: INCREMENT | DECREMENT;
+
+Print: PRINT LPAREN STRINGLIT RPAREN SEMICOLON{$$ = alctree(1400, "Print", 1, $3); freeTree($1); freeTree($2); freeTree($4); freeTree($5);}
+	| PRINT LPAREN STRINGLIT ADD Name RPAREN SEMICOLON {$$ = alctree(1401, "Print", 2, $3, $5); freeTree($1); freeTree($2); freeTree($4); freeTree($6); freeTree($7);}
+	| PRINT LPAREN STRINGLIT ADD Name LSQUARE INTLIT RSQUARE RPAREN SEMICOLON {$$ = alctree(1402, "Print", 3, $3, $5, $7); freeTree($1); freeTree($2); freeTree($4); freeTree($6); freeTree($8); freeTree($9); freeTree($10);}
+	| PRINT LPAREN Name ADD STRINGLIT RPAREN SEMICOLON {$$ = alctree(1403, "Print", 2, $3, $5); freeTree($1); freeTree($2); freeTree($4); freeTree($6); freeTree($7);}
+	| PRINT LPAREN Name LSQUARE INTLIT RSQUARE ADD STRINGLIT RPAREN SEMICOLON {$$ = alctree(1404, "Print", 3, $3, $5, $8); freeTree($1); freeTree($2); freeTree($4); freeTree($6); freeTree($7); freeTree($9); freeTree($10);}
+	| PRINT LPAREN Name RPAREN SEMICOLON {$$ = alctree(1405, "Print", 1, $3); freeTree($1); freeTree($2); freeTree($4); freeTree($5);};
+
+%%
+
+const char *yyname(int sym)
+{
+   return yytname[sym-BAD_TOKEN+3];
+}
+

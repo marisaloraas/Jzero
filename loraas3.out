@@ -1,0 +1,1224 @@
+------------------------------------------------------------
+
+CSE423 HW3 grade sheet for hw3_loraas3
+------------------------------------------------------------
+	HW3 file submitted in archive format:  _1_/1
+	compiles w/out warnings:               _2_/2
+	links/makes OK:                        _1_/1
+	script shows it runs OK:               _1_/1
+	valgrind OK:                           _2_/2
+	syntax checks:                         _3_/3
+	syntax trees:                          _3_/3
+	handles loops:                         _3_/3
+	handles classes:                       _2_/2
+	handles j0 stuff:                      _0_/2 coredump
+	---------------------------------------------
+	Total:                                 18_/20
+	Resubmit fee (-1)		        17/20
+
+
+CSE423 HW3 testrun output for hw3_loraas3
+------------------------------------------------------------
+	(unpacking)
+	(unpacking done rv=0)
+
+
+bison -d j0gram.y
+j0gram.y: warning: 9 shift/reduce conflicts [-Wconflicts-sr]
+gcc -c -Wall j0gram.tab.c
+flex j0lex.l
+gcc -c -Wall lex.yy.c
+gcc -Wall -c parse.c
+gcc -Wall -c main.c
+gcc -g -Wall j0gram.tab.o lex.yy.o parse.o main.o -o j0
+
+
+test0.java input:
+public class test0 { public static int main() {
+  "lexical error...
+} }
+test0.java output [expect lexical error on line 2]
+Lexical Error: line 2 in file test0.java
+exit status: 1 expected 1
+test1.java input:
+public class test1 {
+public static void main() {
+   System.out.println("Hello\tworld\n");
+} }
+test1.java output [expect a syntax tree]
+ClassDecl (1000): 2
+	test1 (270): 0
+	ClassBody (1010): 1
+		MethodDecl (1070): 2
+			MethodHeader (1081): 2
+				void (265): 0
+				MethodDeclarator (1091): 1
+					main (270): 0
+			Block (1140): 1
+				Print (1400): 1
+					"Hello\tworld\n" (278): 0
+exit status: 0 expected 0
+...rerun test1.java under valgrind...
+==14358== Memcheck, a memory error detector
+==14358== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==14358== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==14358== Command: ./j0 test1.java
+==14358== 
+ClassDecl (1000): 2
+	test1 (270): 0
+	ClassBody (1010): 1
+		MethodDecl (1070): 2
+			MethodHeader (1081): 2
+				void (265): 0
+				MethodDeclarator (1091): 1
+					main (270): 0
+			Block (1140): 1
+				Print (1400): 1
+					"Hello\tworld\n" (278): 0
+==14358== 
+==14358== HEAP SUMMARY:
+==14358==     in use at exit: 18,432 bytes in 18 blocks
+==14358==   total heap usage: 111 allocs, 93 frees, 100,890 bytes allocated
+==14358== 
+==14358== LEAK SUMMARY:
+==14358==    definitely lost: 18,432 bytes in 18 blocks
+==14358==    indirectly lost: 0 bytes in 0 blocks
+==14358==      possibly lost: 0 bytes in 0 blocks
+==14358==    still reachable: 0 bytes in 0 blocks
+==14358==         suppressed: 0 bytes in 0 blocks
+==14358== Rerun with --leak-check=full to see details of leaked memory
+==14358== 
+==14358== For counts of detected and suppressed errors, rerun with: -v
+==14358== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+exit status: 0 expected 0
+test2.java input:
+public class test2 {
+  public static int f() {
+    int thread_local = 5;
+    return thread_local
+    }
+}
+test2.java output [expect syntax error on line 5]
+test2.java:5: syntax error before '}' token
+exit status: 2 expected 2
+whiletst.java input:
+public class whiletst {
+// A test of while loop syntax
+public static int random() {
+	return d20 != 20;
+}
+
+public static int main() {
+	int test1;
+	int test2;
+        // infinite loop
+	while (1) {
+		test1 = test1 + 1;
+
+	}
+	// While loop with incrementing variable
+	test1 = 0;
+	while (test1 < 10) {
+		test1 = test1 + 1;
+	}
+
+	// While loop with different expression
+	test2 = 0;
+	while (test2 != 1) {
+		test2 = 1;
+	}
+
+	// While loop with function call (and empty body)
+	while (random()) {
+
+	}
+
+	for(test1=0; test1<20; test1++) {
+	   test1 = test1 + 1;
+	   }
+
+}
+}
+whiletst.java output [expect a syntax tree]
+ClassDecl (1000): 2
+	whiletst (270): 0
+	ClassBody (1010): 1
+		ClassBodyDecls (1020): 2
+			MethodDecl (1070): 2
+				MethodHeader (1080): 2
+					int (263): 0
+					MethodDeclarator (1091): 1
+						random (270): 0
+				Block (1140): 1
+					ReturnStmt (1270): 1
+						NOTEqExpr (1361): 2
+							d20 (270): 0
+							20 (275): 0
+			MethodDecl (1070): 2
+				MethodHeader (1080): 2
+					int (263): 0
+					MethodDeclarator (1091): 1
+						main (270): 0
+				Block (1140): 1
+					BlockStmts (1150): 2
+						LocalVarDeclStmt (1160): 1
+							LocalVarDecl (1170): 2
+								int (263): 0
+								test1 (270): 0
+						BlockStmts (1150): 2
+							LocalVarDeclStmt (1160): 1
+								LocalVarDecl (1170): 2
+									int (263): 0
+									test2 (270): 0
+							BlockStmts (1150): 2
+								WhileStmt (1240): 2
+									1 (275): 0
+									Block (1140): 1
+										ExprStmt (1180): 1
+											Assignment (1390): 3
+												test1 (270): 0
+												= (304): 0
+												AddExpr (1340): 2
+													test1 (270): 0
+													1 (275): 0
+								BlockStmts (1150): 2
+									ExprStmt (1180): 1
+										Assignment (1390): 3
+											test1 (270): 0
+											= (304): 0
+											0 (275): 0
+									BlockStmts (1150): 2
+										WhileStmt (1240): 2
+											RelExpr (1350): 3
+												test1 (270): 0
+												< (289): 0
+												10 (275): 0
+											Block (1140): 1
+												ExprStmt (1180): 1
+													Assignment (1390): 3
+														test1 (270): 0
+														= (304): 0
+														AddExpr (1340): 2
+															test1 (270): 0
+															1 (275): 0
+										BlockStmts (1150): 2
+											ExprStmt (1180): 1
+												Assignment (1390): 3
+													test2 (270): 0
+													= (304): 0
+													0 (275): 0
+											BlockStmts (1150): 2
+												WhileStmt (1240): 2
+													NOTEqExpr (1361): 2
+														test2 (270): 0
+														1 (275): 0
+													Block (1140): 1
+														ExprStmt (1180): 1
+															Assignment (1390): 3
+																test2 (270): 0
+																= (304): 0
+																1 (275): 0
+												BlockStmts (1150): 2
+													WhileStmt (1241): 1
+														MethodCall (1314): 1
+															random (270): 0
+													ForStmt (1250): 4
+														Assignment (1390): 3
+															test1 (270): 0
+															= (304): 0
+															0 (275): 0
+														RelExpr (1350): 3
+															test1 (270): 0
+															< (289): 0
+															20 (275): 0
+														Assignment (1391): 2
+															test1 (270): 0
+															++ (306): 0
+														Block (1140): 1
+															ExprStmt (1180): 1
+																Assignment (1390): 3
+																	test1 (270): 0
+																	= (304): 0
+																	AddExpr (1340): 2
+																		test1 (270): 0
+																		1 (275): 0
+exit status: 0 expected 0
+pet.java input:
+public class pet {
+// This tests a sample virtual pet type
+
+//   public static int hunger;
+//   public static int happy;
+
+public static int play() {
+   int choice;
+   System.out.println("What should we play?\n");
+   System.out.println( "Fetch (1) \n Roll over (2)\n" );
+   choice = 2;
+   if (choice == 1) {
+System.out.println("Fetch, eh");
+      happy = happy+10;
+   } else if (choice == 2) {
+System.out.println("Roll over?  Really?");
+      hunger=hunger+ 1;
+   }
+}
+
+public static void main(String[]argv) {
+  pet myDog = new pet();
+  myDog.play();
+}
+}
+pet.java output [expect a syntax tree]
+ClassDecl (1000): 2
+	pet (270): 0
+	ClassBody (1010): 1
+		ClassBodyDecls (1020): 2
+			MethodDecl (1070): 2
+				MethodHeader (1080): 2
+					int (263): 0
+					MethodDeclarator (1091): 1
+						play (270): 0
+				Block (1140): 1
+					BlockStmts (1150): 2
+						LocalVarDeclStmt (1160): 1
+							LocalVarDecl (1170): 2
+								int (263): 0
+								choice (270): 0
+						BlockStmts (1150): 2
+							Print (1400): 1
+								"What should we play?\n" (278): 0
+							BlockStmts (1150): 2
+								Print (1400): 1
+									"Fetch (1) \n Roll over (2)\n" (278): 0
+								BlockStmts (1150): 2
+									ExprStmt (1180): 1
+										Assignment (1390): 3
+											choice (270): 0
+											= (304): 0
+											2 (275): 0
+									IfThenElseIfStmt (1210): 3
+										EqExpr (1360): 2
+											choice (270): 0
+											1 (275): 0
+										Block (1140): 1
+											BlockStmts (1150): 2
+												Print (1400): 1
+													"Fetch, eh" (278): 0
+												ExprStmt (1180): 1
+													Assignment (1390): 3
+														happy (270): 0
+														= (304): 0
+														AddExpr (1340): 2
+															happy (270): 0
+															10 (275): 0
+										ElseIfStmt (1230): 1
+											IfThenStmt (1190): 2
+												EqExpr (1360): 2
+													choice (270): 0
+													2 (275): 0
+												Block (1140): 1
+													BlockStmts (1150): 2
+														Print (1400): 1
+															"Roll over?  Really?" (278): 0
+														ExprStmt (1180): 1
+															Assignment (1390): 3
+																hunger (270): 0
+																= (304): 0
+																AddExpr (1340): 2
+																	hunger (270): 0
+																	1 (275): 0
+			MethodDecl (1070): 2
+				MethodHeader (1081): 2
+					void (265): 0
+					MethodDeclarator (1090): 2
+						main (270): 0
+						FormalParm (1111): 2
+							String (270): 0
+							argv (270): 0
+				Block (1140): 1
+					BlockStmts (1150): 2
+						LocalVarDeclStmt (1160): 1
+							LocalVarDecl (1172): 3
+								pet (270): 0
+								myDog (270): 0
+								InstantiationExpr (1411): 1
+									pet (270): 0
+						ExprStmt (1180): 1
+							MethodCall (1314): 1
+								QualifiedName (1040): 2
+									myDog (270): 0
+									play (270): 0
+exit status: 0 expected 0
+jstuff.java input:
+public class jstuff {
+/*	
+	multi line 
+	comment 				
+*/
+// single line comment
+
+// public static boolean logicalValue;
+// global scope variable declaration
+// public static int a;
+// public static int b;
+// public static int c;
+// public static int d6;
+// public static int x;
+// public static int y45;
+// public static int g0var;
+//public static int d6Var;
+// public static double dubVal;
+
+public static int assignments() {
+	a = 1;
+	b = 2;
+	c = c- 3;
+}
+
+public static int Operators() {
+int w=0;
+int x;
+int y=0;
+int z=0;
+int q=0 ;
+	x = -1;
+	if (x < y && y <= z || z < q && q != x) {
+	   x = y;
+	   y = z;
+	} else {
+	   w = x + y * z / q - 4;
+	   }
+	logicalValue = w > 20;
+}
+
+public static int WhileStuff() {
+int x;
+   x = 0;
+   for( ; x < 20; ){
+	   x = d6;
+	  return;
+	  }
+}
+
+public static int RollTheDice() {
+	d6Var = 6;
+	y45 = d6Var;
+}
+
+public static int main() {
+	RollTheDice();
+	System.out.println("stuff and things\n");
+	g0var = 2;
+}
+
+// class variable declaration
+public static int MakeAPet() {
+	// local scope variable declaration
+   pet p= new pet();
+   p.play();
+   System.out.println("%d\n" + p.happy);
+}
+
+public static String stringOps() {
+	String S1;
+	String S2;
+	S1 = "One";
+	S2 = S1 + "Two"; // uh oh
+	return S2;
+}
+
+public static int []listOps()  {
+	int [] L;
+	L = new int[3];
+	L[0] = 1; L[1] = 2; L[2] = 3;
+	return L; // uh oh
+}
+}
+jstuff.java output [expect a monstrosity]
+timeout: the monitored command dumped core
+Segmentation fault
+exit status: 139 expected 0
+------------------------------------------------------------
+Source Code:
+------------------------------------------------------------
+files: "tree.h main.c parse.c " "j0lex.l" "j0gram.y"
+------------------------------------------------------------
+
+#ifndef HEADER_FILE
+#define HEADER_FILE
+#include <stdio.h>
+#include <stdbool.h>
+#define BUFF 1024
+extern int yylineno;
+extern char *yytext;
+extern char *yyfilename;
+
+struct tree {
+   int prodrule;
+   char *symbolname;
+   int id;
+   int nkids;
+   struct tree *kids[9]; /* if nkids >0 */
+   struct token *leaf;   /* if nkids == 0; NULL for ε productions */
+   bool isConst;
+   struct SymbolTable *stab;
+};
+
+struct token {
+   int category;   /* the integer code returned by yylex */
+   char *text;     /* the actual string (lexeme) matched */
+   int lineno;     /* the line number on which the token occurs */
+   char *filename; /* the source file in which the token occurs */
+   int ival;       /* for integer constants, store binary value here */
+   double dval;	   /* for real constants, store binary value here */
+   char *sval;     /* for string constants, malloc space, de-escape, store */
+                   /*    the string (less quotes and after escapes) here */
+   };
+
+struct tree *root;
+
+int alctoken(int category);
+void yyerror(char *s);
+void printnode(struct tree *treeptr);
+struct tree *alctree(int prodrule, char *symbolname, int num, ...);
+void printTree(struct tree *root, int level);
+void freeTree(struct tree *root);
+char * alloc(int n);
+
+#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "tree.h"
+extern FILE *yyin;
+extern int yyparse(FILE *f);
+extern int yylex_destroy(void);
+char *yyfilename;
+#define SYMTAB_SIZE 7
+
+int main(int argc, char *argv[]) {
+	yyfilename = (char *)alloc(sizeof(char) * BUFF);
+
+		strcpy(yyfilename, argv[1]);
+		if(strrchr(yyfilename, '.') == NULL){
+			yyfilename = realloc(yyfilename, strlen(yyfilename) + sizeof(".java"));
+			strcat(yyfilename, ".java\0");
+		}else if (strcmp(strrchr(yyfilename, '.'), ".java") == 0){
+			yyfilename[strlen(yyfilename)] = '\0';
+		}else{
+			printf("ERROR: Wrong File extension included\n");
+			free(yyfilename);
+			return -1;
+		}
+		yyin = fopen(yyfilename, "r");
+    	int out = yyparse(yyin);
+		if(out == 0){
+			printTree(root, 0);
+		}else{
+    		printf("yyparse returns %d\n", out);
+		}
+
+	//free memory
+		free(yyfilename);
+		fclose(yyin);
+		freeTree(root);
+		yylex_destroy();
+	return 0;
+}
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+#include "tree.h"
+#include "j0gram.tab.h"
+
+int serial;
+
+char * alloc(int n)
+{
+   char *a = calloc(n, sizeof(char));
+   if (a == NULL) {
+      fprintf(stderr, "alloc(%d): out of memory\n", (int)n);
+      exit(-1);
+      }
+   return a;
+}
+
+int alctoken(int category){
+	if(category == 1){
+		printf("Lexical Error: line %d in file %s\n"
+		,yylineno, yyfilename);
+		exit(1);
+	}else{
+		yylval.treeptr = (struct tree *)alloc(sizeof (struct tree));
+		yylval.treeptr->prodrule = category;
+		yylval.treeptr->symbolname = (char *)alloc(sizeof(char) * BUFF);
+		strcpy(yylval.treeptr->symbolname, yytext);
+		yylval.treeptr->nkids = 0;
+		yylval.treeptr->id = serial++;
+		yylval.treeptr->leaf = (struct token *)alloc(sizeof(struct token));
+		yylval.treeptr->leaf->category = category;
+		yylval.treeptr->leaf->text = (char *)alloc(sizeof(char) * BUFF);
+		strcpy(yylval.treeptr->leaf->text, yytext);
+		yylval.treeptr->leaf->lineno = yylineno;
+		yylval.treeptr->leaf->filename = (char *)alloc(sizeof(char) * BUFF);
+		strcpy(yylval.treeptr->leaf->filename, yyfilename);
+		switch (category) {
+			case 275:
+				yylval.treeptr->leaf->ival = atoi(yytext);
+				break;
+			case 276:
+				yylval.treeptr->leaf->dval = strtod(yytext, NULL);
+				break;
+			case 277:
+				yylval.treeptr->leaf->sval = (char *)alloc(sizeof(char) * BUFF);
+				strncpy(yylval.treeptr->leaf->sval, yytext, strlen(yytext)-1);
+				break;
+			default:
+				yylval.treeptr->leaf->sval = NULL;
+				break;
+			}
+	}
+	return category;
+}
+
+struct tree *alctree(int prodrule, char *symbolname, int num, ...){
+	va_list valist;
+	int i;
+	/* initialize valist for num number of arguments */
+	va_start(valist, num);
+	/* access all the arguments assigned to valist */
+	struct tree * treeNode = (struct tree *)alloc(sizeof (struct tree));
+	treeNode->prodrule = prodrule;
+	treeNode->id = serial++;
+	treeNode->symbolname = (char *)alloc(sizeof(char) * BUFF);
+	strcpy(treeNode->symbolname, symbolname);
+	treeNode->nkids = num;
+	treeNode->leaf = NULL;
+	for (i = 0; i < num; i++) {
+		//treeNode->kids[i] = (struct tree *)alloc(sizeof (struct tree));
+		treeNode->kids[i] = va_arg(valist, struct tree*);
+   }
+   /* clean memory reserved for valist */
+   va_end(valist);
+   return treeNode;
+}
+
+void yyerror(char *s){
+   fprintf(stderr, "%s:%d: %s before '%s' token\n",
+	   yyfilename, yylineno, s, yytext);
+	free(yyfilename);
+	exit(2);
+}
+
+/* For My testing purposes
+void printnode(struct tree *treeptr) {
+    struct token *temp = treeptr->leaf;
+        printf("%d\t\t\t", temp->category);
+        printf("%s\t\t\t", temp->text);
+		printf("%d\t\t", temp->lineno);
+        printf("%s\t\t", temp->filename);
+        switch (temp->category) {
+        case 274:
+            printf("    %d\n", temp->ival);
+            break;
+        case 275:
+            printf("    %f\n", temp->dval);
+            break;
+        case 276:
+			for(int i = 1; i < strlen(temp->sval)-1; i++){
+				printf("%c", temp->sval[i]);
+			}
+            printf("\n");
+			break;
+        default:
+            printf("\n");
+			break;
+        }
+}
+*/
+void printTree(struct tree *root, int level){
+	int depth = root->nkids;
+	for(int j = 0; j < level; j++){
+		printf("\t");
+	}
+	if(depth == 0){
+		printf("%s (%d): %d\n",root->leaf->text ,root->leaf->category, root->nkids);
+	}else{
+		level++;
+		printf("%s (%d): %d\n",root->symbolname , root->prodrule, root->nkids);
+		for(int i = 0; i < depth; i++){
+			printTree(root->kids[i], level);
+		}
+	}
+}
+
+void freeTree(struct tree *root){
+	if(root->nkids == 0){
+		//printf("bark\n");
+		free(root->leaf->text);
+		free(root->leaf->filename);
+		if(root->leaf->category == 276)
+			free(root->leaf->sval);
+		free(root->leaf);
+		free(root);
+	}else{
+		free(root->symbolname);
+		int i = 0;
+		while(i < root->nkids){
+			freeTree(root->kids[i]);
+			i++;
+		}
+		free(root);
+	}
+}
+
+
+/*DOT TREE IMPLEMENTATION */
+/* add a \ before leading and trailing double quotes */
+%option noyywrap
+%option noinput
+%option nounput
+
+%{
+#include <stdio.h>
+#include "tree.h"
+#include "j0gram.tab.h"
+extern int yylineno;
+%}
+%%
+\n             		{ yylineno++; }
+"/*"([^*]|"*"+[^/*])*"*"+"/" 	{ yylineno++; }
+"/*"([^*]|"*"+[^/*])*^["*"+"/"] { return alctoken(1);}
+"//".*\r?\n             { yylineno++;}
+[ \t\r\f]+              { ; }
+
+
+"double"               	{ return alctoken(DOUBLE); }
+"else"                 	{ return alctoken(ELSE); }
+"false"                	{ return alctoken(BOOLLIT); }
+"for"                  	{ return alctoken(FOR); }
+"if"                   	{ return alctoken(IF); }
+"int"                  	{ return alctoken(INT);}
+"null"                 	{ return alctoken(NULLVAL); }
+"public"               	{ return alctoken(PUBLIC); }
+"return"               	{ return alctoken(RETURN); }
+"static"               	{ return alctoken(STATIC); }
+"string"               	{ return alctoken(STRING); }
+"true"                 	{ return alctoken(BOOLLIT); }
+"bool"                 	{ return alctoken(BOOL); }
+"char"					{ return alctoken(CHAR); }
+"float"					{ return alctoken(FLOAT); }
+"void"                 	{ return alctoken(VOID); }
+"while"                	{ return alctoken(WHILE); }
+"class"                	{ return alctoken(CLASS); }
+"long"					{ return alctoken(LONG);}
+"System.out.println"	{ return alctoken(PRINT);}
+<<EOF>> 				{ return -1; }
+"break"                	{ return alctoken(1); }
+"abstract" 				{ return alctoken(1); }
+"assert" 				{ return alctoken(1); }
+"byte" 					{ return alctoken(1); }
+"case" 					{ return alctoken(1); }
+"catch" 				{ return alctoken(1); }
+"const" 				{ return alctoken(1); }
+"continue" 				{ return alctoken(1); }
+"default" 				{ return alctoken(1); }
+"do" 					{ return alctoken(1); }
+"enum" 					{ return alctoken(1); }
+"exports" 				{ return alctoken(1); }
+"extends" 				{ return alctoken(1); }
+"final" 				{ return alctoken(1); }
+"finally" 				{ return alctoken(1); }
+"goto" 					{ return alctoken(1); }
+"implements" 			{ return alctoken(1); }
+"import" 				{ return alctoken(1); }
+"instanceof" 			{ return alctoken(1); }
+"interface" 			{ return alctoken(1); }
+"module" 				{ return alctoken(1); }
+"native" 				{ return alctoken(1); }
+"new" 					{ return alctoken(NEW); }
+"package" 				{ return alctoken(1); }
+"private" 				{ return alctoken(1); }
+"protected" 			{ return alctoken(1); }
+"requires" 				{ return alctoken(1); }
+"short" 				{ return alctoken(1); }
+"strictfp" 				{ return alctoken(1); }
+"super" 				{ return alctoken(1); }
+"switch" 				{ return alctoken(1); }
+"synchronized" 			{ return alctoken(1); }
+"this" 					{ return alctoken(1); }
+"throw" 				{ return alctoken(1); }
+"throws" 				{ return alctoken(1); }
+"transient" 			{ return alctoken(1); }
+"try" 					{ return alctoken(1); }
+"var" 					{ return alctoken(1); }
+"volatile" 				{ return alctoken(1); }
+
+"("                    { return alctoken(LPAREN);}
+")"                    { return alctoken(RPAREN);}
+"["                    { return alctoken(LSQUARE);}
+"]"                    { return alctoken(RSQUARE);}
+"{"                    { return alctoken(LCURLY);}
+"}"                    { return alctoken(RCURLY);}
+";"                    { return alctoken(SEMICOLON);}
+":"                    { return alctoken(COLON);}
+"!"                    { return alctoken(LOGICNOT);}
+"*"                    { return alctoken(MULT);}
+"/"                    { return alctoken(DIVIDE);}
+"%"                    { return alctoken(MODULO);}
+"+"                    { return alctoken(ADD);}
+"-"                    { return alctoken(SUBTRACT);}
+"<"                    { return alctoken(LESSTHAN);}
+"<="                   { return alctoken(LESSTHANOREQUAL);}
+">"                    { return alctoken(GREATERTHAN);}
+">="                   { return alctoken(GREATERTHANOREQUAL);}
+"=="                   { return alctoken(ISEQUALTO);}
+"!="                   { return alctoken(NOTEQUALTO);}
+"&&"                   { return alctoken(LOGICALAND);}
+"||"                   { return alctoken(LOGICALOR);}
+"="                    { return alctoken(ASSIGNMENT); }
+"+="                   { return alctoken(INCREMENT); }
+"++"				   { return alctoken(INCREMENT);}
+"-="                   { return alctoken(DECREMENT); }
+"--"				   { return alctoken(DECREMENT); }
+","                    { return alctoken(COMMA); }
+"."                    { return alctoken(PERIOD); }
+
+[0-9]+                 { return alctoken(INTLIT); }
+[0-9]*"."[0-9]*([eE][+-]?[0-9]+)? { return alctoken(DOUBLELIT); }
+([0-9]+)([eE][+-]?([0-9]+))  { return alctoken(DOUBLELIT); }
+\"[^\"]*\"  			{ return alctoken(STRINGLIT); }
+\"[^\"]*[^\"]   		{ return alctoken(1); }
+[A-Za-z0-9_]+   { return alctoken(IDENTIFIER); }
+.              			{ printf("unrecognized character"); }
+%%
+
+
+...
+
+
+%option noyywrap
+%option noinput
+%option nounput
+
+%{
+#include <stdio.h>
+#include "tree.h"
+#include "j0gram.tab.h"
+extern int yylineno;
+%}
+%%
+\n             		{ yylineno++; }
+"/*"([^*]|"*"+[^/*])*"*"+"/" 	{ yylineno++; }
+"/*"([^*]|"*"+[^/*])*^["*"+"/"] { return alctoken(1);}
+"//".*\r?\n             { yylineno++;}
+[ \t\r\f]+              { ; }
+
+
+"double"               	{ return alctoken(DOUBLE); }
+"else"                 	{ return alctoken(ELSE); }
+"false"                	{ return alctoken(BOOLLIT); }
+"for"                  	{ return alctoken(FOR); }
+"if"                   	{ return alctoken(IF); }
+"int"                  	{ return alctoken(INT);}
+"null"                 	{ return alctoken(NULLVAL); }
+"public"               	{ return alctoken(PUBLIC); }
+"return"               	{ return alctoken(RETURN); }
+"static"               	{ return alctoken(STATIC); }
+"string"               	{ return alctoken(STRING); }
+"true"                 	{ return alctoken(BOOLLIT); }
+"bool"                 	{ return alctoken(BOOL); }
+"char"					{ return alctoken(CHAR); }
+"float"					{ return alctoken(FLOAT); }
+"void"                 	{ return alctoken(VOID); }
+"while"                	{ return alctoken(WHILE); }
+"class"                	{ return alctoken(CLASS); }
+"long"					{ return alctoken(LONG);}
+"System.out.println"	{ return alctoken(PRINT);}
+<<EOF>> 				{ return -1; }
+"break"                	{ return alctoken(1); }
+"abstract" 				{ return alctoken(1); }
+"assert" 				{ return alctoken(1); }
+"byte" 					{ return alctoken(1); }
+"case" 					{ return alctoken(1); }
+"catch" 				{ return alctoken(1); }
+"const" 				{ return alctoken(1); }
+"continue" 				{ return alctoken(1); }
+"default" 				{ return alctoken(1); }
+"do" 					{ return alctoken(1); }
+"enum" 					{ return alctoken(1); }
+"exports" 				{ return alctoken(1); }
+"extends" 				{ return alctoken(1); }
+"final" 				{ return alctoken(1); }
+"finally" 				{ return alctoken(1); }
+"goto" 					{ return alctoken(1); }
+"implements" 			{ return alctoken(1); }
+"import" 				{ return alctoken(1); }
+"instanceof" 			{ return alctoken(1); }
+"interface" 			{ return alctoken(1); }
+"module" 				{ return alctoken(1); }
+"native" 				{ return alctoken(1); }
+"new" 					{ return alctoken(NEW); }
+"package" 				{ return alctoken(1); }
+"private" 				{ return alctoken(1); }
+"protected" 			{ return alctoken(1); }
+"requires" 				{ return alctoken(1); }
+"short" 				{ return alctoken(1); }
+"strictfp" 				{ return alctoken(1); }
+"super" 				{ return alctoken(1); }
+"switch" 				{ return alctoken(1); }
+"synchronized" 			{ return alctoken(1); }
+"this" 					{ return alctoken(1); }
+"throw" 				{ return alctoken(1); }
+"throws" 				{ return alctoken(1); }
+"transient" 			{ return alctoken(1); }
+"try" 					{ return alctoken(1); }
+"var" 					{ return alctoken(1); }
+"volatile" 				{ return alctoken(1); }
+
+"("                    { return alctoken(LPAREN);}
+")"                    { return alctoken(RPAREN);}
+"["                    { return alctoken(LSQUARE);}
+"]"                    { return alctoken(RSQUARE);}
+"{"                    { return alctoken(LCURLY);}
+"}"                    { return alctoken(RCURLY);}
+";"                    { return alctoken(SEMICOLON);}
+":"                    { return alctoken(COLON);}
+"!"                    { return alctoken(LOGICNOT);}
+"*"                    { return alctoken(MULT);}
+"/"                    { return alctoken(DIVIDE);}
+"%"                    { return alctoken(MODULO);}
+"+"                    { return alctoken(ADD);}
+"-"                    { return alctoken(SUBTRACT);}
+"<"                    { return alctoken(LESSTHAN);}
+"<="                   { return alctoken(LESSTHANOREQUAL);}
+">"                    { return alctoken(GREATERTHAN);}
+">="                   { return alctoken(GREATERTHANOREQUAL);}
+"=="                   { return alctoken(ISEQUALTO);}
+"!="                   { return alctoken(NOTEQUALTO);}
+"&&"                   { return alctoken(LOGICALAND);}
+"||"                   { return alctoken(LOGICALOR);}
+"="                    { return alctoken(ASSIGNMENT); }
+"+="                   { return alctoken(INCREMENT); }
+"++"				   { return alctoken(INCREMENT);}
+"-="                   { return alctoken(DECREMENT); }
+"--"				   { return alctoken(DECREMENT); }
+","                    { return alctoken(COMMA); }
+"."                    { return alctoken(PERIOD); }
+
+[0-9]+                 { return alctoken(INTLIT); }
+[0-9]*"."[0-9]*([eE][+-]?[0-9]+)? { return alctoken(DOUBLELIT); }
+([0-9]+)([eE][+-]?([0-9]+))  { return alctoken(DOUBLELIT); }
+\"[^\"]*\"  			{ return alctoken(STRINGLIT); }
+\"[^\"]*[^\"]   		{ return alctoken(1); }
+[A-Za-z0-9_]+   { return alctoken(IDENTIFIER); }
+.              			{ printf("unrecognized character"); }
+%%
+%{
+#include "tree.h"
+#include "j0gram.tab.h"
+extern int yylex(void);
+extern void yyerror(char *);
+extern struct tree *root;
+%}
+%union {
+   struct tree *treeptr;
+}
+
+
+%token <treeptr> BAD_TOKEN
+%token <treeptr> DOUBLE
+%token <treeptr> ELSE
+%token <treeptr> FOR
+%token <treeptr> IF
+%token <treeptr> INT
+%token <treeptr> RETURN
+%token <treeptr> VOID
+%token <treeptr> WHILE
+%token <treeptr> CHAR
+%token <treeptr> FLOAT
+%token <treeptr> LONG
+%token <treeptr> IDENTIFIER
+%token <treeptr> CLASSNAME
+%token <treeptr> CLASS
+%token <treeptr> STRING
+%token <treeptr> BOOL
+%token <treeptr> INTLIT
+%token <treeptr> DOUBLELIT
+%token <treeptr> CHARLIT
+%token <treeptr> STRINGLIT
+%token <treeptr> BOOLLIT
+%token <treeptr> NULLVAL
+%token <treeptr> LESSTHANOREQUAL
+%token <treeptr> GREATERTHANOREQUAL
+%token <treeptr> ISEQUALTO
+%token <treeptr> NOTEQUALTO
+%token <treeptr> LOGICALAND
+%token <treeptr> LOGICALOR
+%token <treeptr> LOGICNOT
+%token <treeptr> GREATERTHAN
+%token <treeptr> LESSTHAN
+%token <treeptr> MODULO
+%token <treeptr> MULT
+%token <treeptr> DIVIDE
+%token <treeptr> ADD
+%token <treeptr> SUBTRACT
+%token <treeptr> PERIOD
+%token <treeptr> LPAREN
+%token <treeptr> RPAREN
+%token <treeptr> LSQUARE
+%token <treeptr> RSQUARE
+%token <treeptr> LCURLY
+%token <treeptr> RCURLY
+%token <treeptr> COMMA
+%token <treeptr> SEMICOLON
+%token <treeptr> ASSIGNMENT
+%token <treeptr> COLON
+%token <treeptr> INCREMENT
+%token <treeptr> DECREMENT
+%token <treeptr> PUBLIC
+%token <treeptr> STATIC
+%token <treeptr> PRINT
+
+%type <treeptr> ClassDecl
+%type <treeptr> ClassBody
+%type <treeptr> ClassBodyDecls
+%type <treeptr> ClassBodyDecl
+%type <treeptr> FieldDecl
+%type <treeptr> Type
+%type <treeptr> Name
+%type <treeptr> QualifiedName
+%type <treeptr> VarDecls
+%type <treeptr> VarDeclarator
+%type <treeptr> MethodDecl
+%type <treeptr> MethodHeader
+/*%type <treeptr> MethodReturnVal*/
+%type <treeptr> MethodDeclarator
+%type <treeptr> FormalParmListOpt
+%type <treeptr> FormalParmList
+%type <treeptr> FormalParm
+%type <treeptr> ConstructorDecl
+%type <treeptr> ConstructorDeclarator
+%type <treeptr> ArgListOpt
+%type <treeptr> Block
+%type <treeptr> BlockStmtsOpt
+%type <treeptr> BlockStmts
+%type <treeptr> BlockStmt
+%type <treeptr> LocalVarDeclStmt
+%type <treeptr> LocalVarDecl
+%type <treeptr> StmtWithoutTrailingStmt
+%type <treeptr> Stmt
+%type <treeptr> ExprStmt
+%type <treeptr> StmtExpr
+%type <treeptr> IfThenStmt
+%type <treeptr> IfThenElseStmt
+%type <treeptr> IfThenElseIfStmt
+%type <treeptr> ElseIfSequence
+%type <treeptr> ElseIfStmt
+%type <treeptr> WhileStmt
+%type <treeptr> ForStmt
+%type <treeptr> ForInit
+%type <treeptr> ExprOpt
+%type <treeptr> ForUpdate
+%type <treeptr> StmtExprList
+%type <treeptr> ReturnStmt
+%type <treeptr> Primary
+%type <treeptr> Literal
+%type <treeptr> ArgList
+%type <treeptr> FieldAccess
+%type <treeptr> MethodCall
+%type <treeptr> PostFixExpr
+%type <treeptr> UnaryExpr
+%type <treeptr> MulExpr
+%type <treeptr> AddExpr
+%type <treeptr> RelOp
+%type <treeptr> RelExpr
+%type <treeptr> EqExpr
+%type <treeptr> CondAndExpr
+%type <treeptr> CondOrExpr
+%type <treeptr> Expr
+%type <treeptr> Assignment
+%type <treeptr> LeftHandSide
+%type <treeptr> AssignOp
+%type <treeptr> Print
+%type <treeptr> IncDec
+%token <treeptr> NEW
+%type <treeptr> InstantiationExpr
+%type <treeptr> PrintStatement
+%%
+
+
+ClassDecl: PUBLIC CLASS IDENTIFIER ClassBody {$$ = alctree(1000, "ClassDecl", 2, $3, $4);
+														root = $$;	freeTree($1); freeTree($2); };
+
+ClassBody: LCURLY ClassBodyDecls RCURLY {$$ = alctree(1010, "ClassBody", 1, $2); freeTree($1); freeTree($3);}
+	| LCURLY RCURLY {$$ = NULL; freeTree($1); freeTree($2);} ;
+ClassBodyDecls: ClassBodyDecl | ClassBodyDecls ClassBodyDecl  {$$ = alctree(1020, "ClassBodyDecls", 2, $1, $2);};
+ClassBodyDecl: FieldDecl | MethodDecl | ConstructorDecl ;
+
+FieldDecl: PUBLIC STATIC Type VarDecls SEMICOLON {$$ = alctree(1030, "FieldDecl", 2, $3, $4); freeTree($1); freeTree($2); freeTree($5);}
+| PUBLIC STATIC Type VarDeclarator ASSIGNMENT ExprStmt SEMICOLON {$$ = alctree(1031, "FieldDecl", 3, $3, $4, $6); freeTree($1); freeTree($2); freeTree($5); freeTree($7);};
+Type: INT | DOUBLE | BOOL | STRING | FLOAT | CHAR | LONG | Name;
+Name: IDENTIFIER | QualifiedName ;
+QualifiedName: Name PERIOD IDENTIFIER {$$ = alctree(1040, "QualifiedName", 2, $1, $3); freeTree($2);};
+VarDecls: VarDeclarator | VarDecls COMMA VarDeclarator {$$ = alctree(1050, "VarDecls", 2, $1, $3); freeTree($2); } ;
+VarDeclarator: IDENTIFIER;
+
+
+
+...
+
+
+%type <treeptr> PostFixExpr
+%type <treeptr> UnaryExpr
+%type <treeptr> MulExpr
+%type <treeptr> AddExpr
+%type <treeptr> RelOp
+%type <treeptr> RelExpr
+%type <treeptr> EqExpr
+%type <treeptr> CondAndExpr
+%type <treeptr> CondOrExpr
+%type <treeptr> Expr
+%type <treeptr> Assignment
+%type <treeptr> LeftHandSide
+%type <treeptr> AssignOp
+%type <treeptr> Print
+%type <treeptr> IncDec
+%token <treeptr> NEW
+%type <treeptr> InstantiationExpr
+%type <treeptr> PrintStatement
+%%
+
+
+ClassDecl: PUBLIC CLASS IDENTIFIER ClassBody {$$ = alctree(1000, "ClassDecl", 2, $3, $4);
+														root = $$;	freeTree($1); freeTree($2); };
+
+ClassBody: LCURLY ClassBodyDecls RCURLY {$$ = alctree(1010, "ClassBody", 1, $2); freeTree($1); freeTree($3);}
+	| LCURLY RCURLY {$$ = NULL; freeTree($1); freeTree($2);} ;
+ClassBodyDecls: ClassBodyDecl | ClassBodyDecls ClassBodyDecl  {$$ = alctree(1020, "ClassBodyDecls", 2, $1, $2);};
+ClassBodyDecl: FieldDecl | MethodDecl | ConstructorDecl ;
+
+FieldDecl: PUBLIC STATIC Type VarDecls SEMICOLON {$$ = alctree(1030, "FieldDecl", 2, $3, $4); freeTree($1); freeTree($2); freeTree($5);}
+| PUBLIC STATIC Type VarDeclarator ASSIGNMENT ExprStmt SEMICOLON {$$ = alctree(1031, "FieldDecl", 3, $3, $4, $6); freeTree($1); freeTree($2); freeTree($5); freeTree($7);};
+Type: INT | DOUBLE | BOOL | STRING | FLOAT | CHAR | LONG | Name;
+Name: IDENTIFIER | QualifiedName ;
+QualifiedName: Name PERIOD IDENTIFIER {$$ = alctree(1040, "QualifiedName", 2, $1, $3); freeTree($2);};
+VarDecls: VarDeclarator | VarDecls COMMA VarDeclarator {$$ = alctree(1050, "VarDecls", 2, $1, $3); freeTree($2); } ;
+VarDeclarator: IDENTIFIER;
+
+MethodDecl: MethodHeader Block {$$ = alctree(1070, "MethodDecl", 2, $1, $2);};
+MethodHeader: PUBLIC STATIC Type MethodDeclarator {$$ = alctree(1080, "MethodHeader", 2, $3, $4); freeTree($1); freeTree($2);}
+	|PUBLIC STATIC VOID MethodDeclarator {$$ = alctree(1081, "MethodHeader", 2, $3, $4); freeTree($1); freeTree($2);}
+	|PUBLIC STATIC Type LSQUARE RSQUARE MethodDeclarator {$$ = alctree(1082, "MethodHeader", 2, $3, $6); freeTree($1); freeTree($2);};
+/*MethodReturnVal: Type;*/
+MethodDeclarator: IDENTIFIER LPAREN FormalParmListOpt RPAREN {$$ = alctree(1090, "MethodDeclarator", 2, $1, $3); freeTree($2); freeTree($4);}
+	| IDENTIFIER LPAREN RPAREN {$$ = alctree(1091, "MethodDeclarator", 1, $1); freeTree($2); freeTree($3);};
+FormalParmListOpt: FormalParmList | { $$ = NULL; };
+FormalParmList: FormalParm | FormalParm COMMA FormalParmList {$$ = alctree(1500, "FormalParmList", 2, $1, $3); freeTree($2);};
+FormalParm: Type VarDeclarator {$$ = alctree(1110, "FormalParm", 2, $1, $2);}
+			| Type LSQUARE RSQUARE VarDeclarator{$$ = alctree(1111, "FormalParm", 2, $1, $4); freeTree($2); freeTree($3);};
+
+ConstructorDecl: ConstructorDeclarator Block {$$ = alctree(1120, "ConstructorDecl", 2, $1, $2);};
+ConstructorDeclarator: PUBLIC STATIC IDENTIFIER LPAREN FormalParmListOpt RPAREN {$$ = alctree(1130, "ConstructorDeclarator", 2, $1, $3); freeTree($2); freeTree($4);};
+ArgListOpt:  ArgList | { $$ = NULL; } ;
+
+Block: LCURLY BlockStmtsOpt RCURLY {$$ = alctree(1140, "Block", 1, $2); freeTree($1); freeTree($3);};
+BlockStmtsOpt: BlockStmts | { $$ = NULL; };
+BlockStmts:  BlockStmt BlockStmts   {$$ = alctree(1150, "BlockStmts", 2, $1, $2);} | BlockStmt;
+BlockStmt:   LocalVarDeclStmt | Stmt ;
+
+LocalVarDeclStmt: LocalVarDecl SEMICOLON {$$ = alctree(1160, "LocalVarDeclStmt", 1, $1); freeTree($2);};
+LocalVarDecl: Type VarDecls {$$ = alctree(1170, "LocalVarDecl", 2, $1, $2);}
+	| Type VarDeclarator ASSIGNMENT Literal {$$ = alctree(1171, "LocalVarDecl", 3, $1, $2, $4); freeTree($3);}
+	| Type VarDeclarator ASSIGNMENT InstantiationExpr {$$ = alctree(1172, "LocalVarDecl", 3, $1, $2, $4); freeTree($3);}
+	| Type LSQUARE RSQUARE VarDeclarator ASSIGNMENT InstantiationExpr {$$ = alctree(1173, "LocalVarDecl", 3, $1, $4, $6); freeTree($2); freeTree($3); freeTree($5);}
+	| Type LSQUARE RSQUARE VarDeclarator  {$$ = alctree(1174, "LocalVarDecl", 2, $1, $4); freeTree($2); freeTree($3);};
+
+StmtWithoutTrailingStmt: Block | SEMICOLON | ExprStmt | ReturnStmt ;
+Stmt: StmtWithoutTrailingStmt | IfThenStmt | IfThenElseStmt | IfThenElseIfStmt
+      | WhileStmt | ForStmt | Print;
+
+ExprStmt: StmtExpr SEMICOLON {$$ = alctree(1180, "ExprStmt", 1, $1); freeTree($2);};
+
+StmtExpr: Assignment | MethodCall;
+
+IfThenStmt: IF LPAREN Expr RPAREN Block {$$ = alctree(1190, "IfThenStmt", 2, $3, $5); freeTree($1); freeTree($2); freeTree($4);};
+IfThenElseStmt: IF LPAREN Expr RPAREN Block ELSE Block {$$ = alctree(1200, "IfThenElseStmt", 3, $3, $5, $7); freeTree($1); freeTree($2); freeTree($4); freeTree($6);};
+IfThenElseIfStmt: IF LPAREN Expr RPAREN Block ElseIfSequence {$$ = alctree(1210, "IfThenElseIfStmt", 3, $3, $5, $6); freeTree($1); freeTree($2); freeTree($4);}
+       |  IF LPAREN Expr RPAREN Block ElseIfSequence ELSE Block {$$ = alctree(1211, "IfThenElseIfStmt", 4, $3, $5, $6, $8); freeTree($1); freeTree($2); freeTree($4); freeTree($7);};
+
+ElseIfSequence: ElseIfStmt | ElseIfSequence ElseIfStmt {$$ = alctree(1220, "ElseIfSequence", 2, $1, $2);};
+ElseIfStmt: ELSE IfThenStmt {$$ = alctree(1230, "ElseIfStmt", 1, $2); freeTree($1);} ;
+WhileStmt: WHILE LPAREN Expr RPAREN Stmt {$$ = alctree(1240, "WhileStmt", 2, $3, $5); freeTree($1); freeTree($2); freeTree($4);}
+	| WHILE LPAREN Expr RPAREN LCURLY RCURLY {$$ = alctree(1241, "WhileStmt", 1, $3); freeTree($1); freeTree($2); freeTree($4); freeTree($5); freeTree($6);};
+
+ForStmt: FOR LPAREN ForInit SEMICOLON ExprOpt SEMICOLON ForUpdate RPAREN Block { $$ = alctree(1250, "ForStmt", 4, $3, $5, $7, $9); freeTree($1); freeTree($2); freeTree($4); freeTree($6); freeTree($8);}
+		| FOR LPAREN SEMICOLON ExprOpt SEMICOLON ForUpdate RPAREN Block { $$ = alctree(1251, "ForStmt", 3, $4, $6, $8); freeTree($1); freeTree($2); freeTree($3); freeTree($5); freeTree($7);}
+		| FOR LPAREN SEMICOLON ExprOpt SEMICOLON RPAREN Block { $$ = alctree(1252, "ForStmt", 2, $4, $7); freeTree($1); freeTree($2); freeTree($3); freeTree($5); freeTree($6);};
+
+ForInit: StmtExprList | LocalVarDecl;
+ExprOpt: Expr |  { $$ = NULL; } ;
+ForUpdate: StmtExprList | { $$ = NULL; } ;
+
+StmtExprList: StmtExpr | StmtExprList COMMA StmtExpr {$$ = alctree(1260, "StmtExprList", 2, $1, $3); freeTree($2);};
+
+ReturnStmt: RETURN ExprOpt SEMICOLON {$$ = alctree(1270, "ReturnStmt", 1, $2); freeTree($1); freeTree($3);};
+
+Primary:  Literal
+	| LPAREN Expr RPAREN {$$ = alctree(1280, "Primary", 1, $2); freeTree($1); freeTree($3);}
+	| FieldAccess | MethodCall ;
+Literal: INTLIT	| DOUBLELIT | BOOLLIT | CHARLIT | STRINGLIT | NULLVAL ;
+InstantiationExpr: NEW Type LSQUARE INTLIT RSQUARE {$$ = alctree(1410, "InstantiationExpr", 2, $2, $4); freeTree($1); freeTree($3); freeTree($5);}
+	| NEW Type LPAREN RPAREN {$$ = alctree(1411, "InstantiationExpr", 1, $2); freeTree($1); freeTree($3); freeTree($4);};
+ArgList: Expr
+	| ArgList COMMA Expr {$$ = alctree(1290, "ArgList", 2, $1, $3); freeTree($2);};
+FieldAccess: Primary PERIOD IDENTIFIER {$$ = alctree(1300, "FieldAccess", 2, $1, $3); freeTree($2);}
+| IDENTIFIER LSQUARE INTLIT RSQUARE {$$ = alctree(1301, "FieldAccess", 2, $1, $3); freeTree($2); freeTree($4);};
+MethodCall: Name LPAREN ArgListOpt RPAREN {$$ = alctree(1310, "MethodCall", 2, $1, $3); freeTree($2); freeTree($4);}
+	| Name LPAREN RPAREN {$$ = alctree(1314, "MethodCall", 1, $1); freeTree($2); freeTree($3);}
+	| Primary PERIOD IDENTIFIER LPAREN ArgListOpt RPAREN {$$ = alctree(1312, "MethodCall", 3, $1, $3, $5); freeTree($2); freeTree($4); freeTree($6);}
+PostFixExpr: Primary | Name ;
+UnaryExpr:  SUBTRACT UnaryExpr {$$ = alctree(1320, "UnaryExpr", 2, $1, $2);}
+	| LOGICNOT UnaryExpr {$$ = alctree(1321, "UnaryExpr", 2, $1, $2);}
+	| PostFixExpr ;
+MulExpr: UnaryExpr
+	| MulExpr MULT UnaryExpr {$$ = alctree(1330, "MulExpr", 2, $1, $3); freeTree($2);}
+    | MulExpr DIVIDE UnaryExpr  {$$ = alctree(1331, "MulExpr", 2, $1, $3); freeTree($2);}
+	| MulExpr MODULO UnaryExpr  {$$ = alctree(1332, "MulExpr", 2, $1, $3); freeTree($2);};
+AddExpr: MulExpr
+	| AddExpr ADD MulExpr {$$ = alctree(1340, "AddExpr", 2, $1, $3); freeTree($2);}
+	| AddExpr SUBTRACT MulExpr {$$ = alctree(1341, "AddExpr", 2, $1, $3); freeTree($2);};
+RelOp: LESSTHANOREQUAL | GREATERTHANOREQUAL | LESSTHAN | GREATERTHAN ;
+RelExpr: AddExpr | RelExpr RelOp AddExpr  {$$ = alctree(1350, "RelExpr", 3, $1, $2, $3);};
+
+EqExpr: RelExpr
+	| EqExpr ISEQUALTO RelExpr  {$$ = alctree(1360, "EqExpr", 2, $1, $3); freeTree($2);}
+	| EqExpr NOTEQUALTO RelExpr {$$ = alctree(1361, "NOTEqExpr", 2, $1, $3); freeTree($2);};
+CondAndExpr: EqExpr
+	| CondAndExpr LOGICALAND EqExpr {$$ = alctree(1370, "CondAndExpr", 2, $1, $3); freeTree($2);} ;
+CondOrExpr: CondAndExpr
+	| CondOrExpr LOGICALOR CondAndExpr {$$ = alctree(1380, "CondOrExpr", 2, $1, $3);freeTree($2);} ;
+
+Expr: CondOrExpr | Assignment;
+Assignment: LeftHandSide AssignOp Expr {$$ = alctree(1390, "Assignment", 3, $1, $2, $3);}
+	| LeftHandSide IncDec {$$ = alctree(1391, "Assignment", 2, $1, $2);}
+	| LeftHandSide ASSIGNMENT InstantiationExpr {$$ = alctree(1392, "Assignment", 2, $1, $3); freeTree($2);};
+LeftHandSide: LocalVarDecl | Name | FieldAccess | Name LSQUARE INTLIT RSQUARE {$$ = alctree(1420, "LeftHandSide", 2, $1, $3); freeTree($2); freeTree($4);};
+AssignOp: ASSIGNMENT | INCREMENT | DECREMENT ;
+IncDec: INCREMENT | DECREMENT ;
+
+Print: PRINT LPAREN PrintStatement RPAREN SEMICOLON{$$ = alctree(1400, "Print", 1, $3); freeTree($1); freeTree($2); freeTree($4); freeTree($5);};
+PrintStatement: STRINGLIT
+	| PrintStatement ADD STRINGLIT {$$ = alctree(1600, "PrintStatement", 2, $1, $3); freeTree($2);}
+	| PrintStatement ADD Name {$$ = alctree(1600, "PrintStatement", 2, $1, $3); freeTree($2);}
+	| Name;
+
+%%
+
+/*const char *yyname(int sym)
+{
+   return yytname[sym-BAD_TOKEN+3];
+}*/
+
